@@ -5,13 +5,13 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     calcularCapacidad();
-    lucide.createIcons();
+    Icons.init();
 });
 
 function calcularCapacidad() {
     const horasProductivas = parseFloat(document.getElementById('input-horas-productivas').value) || 6;
     const tareas = Store.state.tareas;
-    const hoyIso = new Date().toISOString().split('T')[0];
+    const hoyIso = Store.fechaIsoLocal(new Date());
 
     // 1. Calcular carga de HOY
     const tareasHoy = tareas.filter(t => t.fecha === hoyIso && !t.completada);
@@ -76,7 +76,7 @@ function renderizarPrediccion(limite) {
     for (let i = 1; i <= 5; i++) {
         const d = new Date(hoy);
         d.setDate(hoy.getDate() + i);
-        const iso = d.toISOString().split('T')[0];
+        const iso = Store.fechaIsoLocal(d);
         const diaNombre = d.toLocaleDateString('es-ES', { weekday: 'short' });
 
         // Calcular carga del día

@@ -3,48 +3,94 @@
  * Lógica para la gestión de hábitos (GitHub Style + Contexto)
  */
 
+// Estado de navegación
+let fechaFocoHabitos = new Date();
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Escuchar cambios de espacio (si decidimos filtrar hábitos por espacio)
     renderizarHabitos();
+    configurarNavegacionSemana();
 });
+
+function configurarNavegacionSemana() {
+    const cabecera = document.querySelector('.titulo-y-nav-habitos');
+    if (!cabecera) return;
+
+    const existeNav = document.querySelector('.navegacion-semana-habitos');
+    if (existeNav) return;
+
+    const navDiv = document.createElement('div');
+    navDiv.className = 'navegacion-semana-habitos';
+    navDiv.innerHTML = `
+        <button class="btn-nav-mini" id="btn-prev-semana-habitos">◀</button>
+        <button class="btn-nav-mini" id="btn-hoy-habitos">Hoy</button>
+        <button class="btn-nav-mini" id="btn-next-semana-habitos">▶</button>
+    `;
+
+    cabecera.appendChild(navDiv);
+
+    document.getElementById('btn-prev-semana-habitos').addEventListener('click', () => {
+        fechaFocoHabitos.setDate(fechaFocoHabitos.getDate() - 7);
+        renderizarHabitos();
+    });
+
+    document.getElementById('btn-next-semana-habitos').addEventListener('click', () => {
+        fechaFocoHabitos.setDate(fechaFocoHabitos.getDate() + 7);
+        renderizarHabitos();
+    });
+
+    document.getElementById('btn-hoy-habitos').addEventListener('click', () => {
+        fechaFocoHabitos = new Date();
+        renderizarHabitos();
+    });
+}
+
+function inicioDeSemanaLunes(fecha) {
+    const d = new Date(fecha);
+    d.setHours(0, 0, 0, 0);
+    const idxLunes = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - idxLunes);
+    return d;
+}
 
 function renderizarHabitos() {
     const contenedor = document.querySelector('.cuadro-habitos');
-    const habitos = Store.obtenerHabitos(); // Por ahora globales
+    const habitos = Store.obtenerHabitos();
     if (!contenedor || !habitos) return;
 
-    // Limpiar contenedor pero manteniendo el header si se desea,
-    // o reconstruirlo todo. Vamos a reconstruir filas debajo del header.
-    // Asumimos que el HTML tiene un header fijo que no borramos?
-    // Mejor borramos todo menos el header estático si existe, o usamos un div contenedor de filas.
-    // Para simplificar, limpiamos y re-agregamos.
-
-    // Generar fechas de los últimos 7 días (incluyendo hoy)
+    const inicioSemana = inicioDeSemanaLunes(fechaFocoHabitos);
     const fechasMostradas = [];
     const hoy = new Date();
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date(hoy);
-        d.setDate(hoy.getDate() - i);
+    hoy.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(inicioSemana);
+        d.setDate(inicioSemana.getDate() + i);
+        const esHoy = d.getTime() === hoy.getTime();
         fechasMostradas.push({
-            iso: d.toISOString().split('T')[0],
-            dia: d.toLocaleDateString('es-ES', { weekday: 'narrow' }), // L, M, X...
-            num: d.getDate()
+            iso: Store.fechaIsoLocal(d),
+            dia: d.toLocaleDateString('es-ES', { weekday: 'narrow' }),
+            num: d.getDate(),
+            esHoy: esHoy
         });
     }
 
-    // Limpiar filas viejas (mantenemos el header de la tabla si existe en HTML, o lo generamos)
-    // Vamos a buscar si existe un contenedor de filas, si no lo creamos.
     let contenedorFilas = contenedor.querySelector('.contenedor-filas');
     if (!contenedorFilas) {
-        // Si no existe estructura, la creamos (primera vez o borrado total)
         contenedor.innerHTML = '';
 
-        // Header de fechas
         const header = document.createElement('header');
         header.innerHTML = `
-            <span>Hábito</span>
+            <div class="habito-header-nombre">
+                <span>Hábito</span>
+                <button class="btn-nuevo-habito-mini" onclick="activarInputNuevoHabito()" title="Nuevo hábito">+</button>
+            </div>
             <div class="encabezado-dias">
-                ${fechasMostradas.map(f => `<span style="width:28px; text-align:center;">${f.dia}</span>`).join('')}
+                ${fechasMostradas.map(f => `
+                    <span class="dia-header ${f.esHoy ? 'dia-hoy' : ''}" style="width:28px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.7rem; color: ${f.esHoy ? 'var(--color-acento)' : 'var(--color-texto-secundario)'};">${f.dia}</span>
+                        <span style="font-size:0.8rem; font-weight:${f.esHoy ? '700' : '400'}; color: ${f.esHoy ? 'var(--color-acento)' : 'var(--color-texto-blanco)'};">${f.num}</span>
+                    </span>
+                `).join('')}
             </div>
         `;
         contenedor.appendChild(header);
@@ -53,6 +99,23 @@ function renderizarHabitos() {
         contenedorFilas.className = 'contenedor-filas';
         contenedor.appendChild(contenedorFilas);
     } else {
+        const header = contenedor.querySelector('header');
+        if (header) {
+            header.innerHTML = `
+                <div class="habito-header-nombre">
+                    <span>Hábito</span>
+                    <button class="btn-nuevo-habito-mini" onclick="activarInputNuevoHabito()" title="Nuevo hábito">+</button>
+                </div>
+                <div class="encabezado-dias">
+                    ${fechasMostradas.map(f => `
+                        <span class="dia-header ${f.esHoy ? 'dia-hoy' : ''}" style="width:28px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+                            <span style="font-size:0.7rem; color: ${f.esHoy ? 'var(--color-acento)' : 'var(--color-texto-secundario)'};">${f.dia}</span>
+                            <span style="font-size:0.8rem; font-weight:${f.esHoy ? '700' : '400'}; color: ${f.esHoy ? 'var(--color-acento)' : 'var(--color-texto-blanco)'};">${f.num}</span>
+                        </span>
+                    `).join('')}
+                </div>
+            `;
+        }
         contenedorFilas.innerHTML = '';
     }
 
@@ -60,31 +123,28 @@ function renderizarHabitos() {
         const fila = document.createElement('div');
         fila.className = 'fila-habito';
 
-        // Nombre
         const divNombre = document.createElement('div');
         divNombre.className = 'nombre-habito';
         divNombre.textContent = habito.nombre;
         fila.appendChild(divNombre);
 
-        // Marcas (Grid)
         const divMarcas = document.createElement('div');
         divMarcas.className = 'marcas-habito';
 
         fechasMostradas.forEach(fecha => {
             const registro = habito.registros ? habito.registros[fecha.iso] : null;
             const completado = registro && registro.completado;
-            const tieneNota = registro && registro.nota;
 
             const marcaContenedor = document.createElement('div');
             marcaContenedor.className = 'marca-contenedor';
 
             const spanMarca = document.createElement('span');
-            spanMarca.className = `marca ${completado ? 'llena' : ''} ${tieneNota ? 'con-nota' : ''}`;
-            spanMarca.title = registro ? registro.nota : fecha.iso;
+            spanMarca.className = `marca ${completado ? 'llena' : ''}`;
+            spanMarca.title = fecha.iso;
 
-            // Click abre modal contexto
             spanMarca.onclick = () => {
-                abrirModalContexto(habito, fecha.iso);
+                Store.toggleHabitoDia(habito.id, fecha.iso, '');
+                renderizarHabitos();
             };
 
             marcaContenedor.appendChild(spanMarca);
@@ -96,77 +156,51 @@ function renderizarHabitos() {
     });
 }
 
-window.abrirModalContexto = (habito, fechaIso) => {
-    // Verificar estado actual
-    const registro = habito.registros ? habito.registros[fechaIso] : null;
-    const completado = registro && registro.completado;
+// Botón "Nuevo hábito" inline se maneja vía onclick en el icono "+"
 
-    // Si ya está completado, al hacer click podríamos querer:
-    // 1. Desmarcar (borrar)
-    // 2. Editar nota
-    // Vamos a mostrar un modal pequeño
+function activarInputNuevoHabito() {
+    const contenedorFilas = document.querySelector('.contenedor-filas');
+    if (!contenedorFilas) return;
 
-    // Eliminar modal anterior
-    const existente = document.getElementById('modal-contexto');
-    if (existente) existente.remove();
+    if (document.getElementById('input-nuevo-habito')) return;
 
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.id = 'modal-contexto';
-    overlay.onclick = (e) => {
-        if (e.target === overlay) cerrarModalContexto();
+    const fila = document.createElement('div');
+    fila.className = 'fila-habito input-wrapper-habito';
+    fila.id = 'input-nuevo-habito';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'input-habito';
+    input.placeholder = 'Nombre del hábito (Enter para guardar)...';
+
+    fila.appendChild(input);
+    contenedorFilas.insertBefore(fila, contenedorFilas.firstChild);
+    input.focus();
+
+    let yaGuardado = false;
+    const guardar = () => {
+        if (yaGuardado) return;
+        const nombre = input.value.trim();
+        if (nombre) {
+            yaGuardado = true;
+            Store.agregarHabito({ nombre });
+            renderizarHabitos();
+        } else {
+            fila.remove();
+        }
     };
 
-    const notaActual = registro ? registro.nota : '';
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            guardar();
+        } else if (e.key === 'Escape') {
+            yaGuardado = true;
+            fila.remove();
+        }
+    });
 
-    const textoAccion = completado ? 'Actualizar detalles' : 'Completar hábito';
-    const textoBoton = completado ? 'Guardar Cambios' : 'Marcar Completado';
-
-    overlay.innerHTML = `
-        <div class="modal-contexto-habito" onclick="event.stopPropagation()">
-            <div class="modal-contexto-header">
-                ${habito.nombre} <span style="font-weight:400; color:#888;">(${fechaIso})</span>
-            </div>
-            
-            <input type="text" id="input-contexto" 
-                   class="input-contexto" 
-                   value="${notaActual}" 
-                   placeholder="Añade contexto (ej. pág 20, 30 mins)..." 
-                   autofocus>
-                   
-            <div style="display:flex; gap:8px;">
-                ${completado ? `<button onclick="borrarRegistro(${habito.id}, '${fechaIso}')" style="background:#EF4444; color:white; border:none; padding:8px; border-radius:6px; cursor:pointer;">Desmarcar</button>` : ''}
-                <button class="btn-guardar-contexto" onclick="guardarContexto(${habito.id}, '${fechaIso}')">
-                    ${textoBoton}
-                </button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-    setTimeout(() => document.getElementById('input-contexto')?.focus(), 100);
-};
-
-window.guardarContexto = (idHabito, fechaIso) => {
-    const nota = document.getElementById('input-contexto').value.trim();
-    Store.toggleHabitoDia(idHabito, fechaIso, nota);
-    cerrarModalContexto();
-    renderizarHabitos();
-};
-
-window.borrarRegistro = (idHabito, fechaIso) => {
-    if (confirm('¿Desmarcar este día?')) {
-        // Enviar nota vacía y forzar lógica de toggle off si estaba on
-        // Pero toggleHabitoDia espera un toggle.
-        // Si está ON y mando vacía -> se borra (según lógica store.js updateada)
-        // Store.toggleHabitoDia hace: si existe y completado y !nota -> delete.
-        Store.toggleHabitoDia(idHabito, fechaIso, "");
-        cerrarModalContexto();
-        renderizarHabitos();
-    }
+    input.addEventListener('blur', () => {
+        setTimeout(() => { if (!yaGuardado) guardar(); }, 100);
+    });
 }
-
-window.cerrarModalContexto = () => {
-    const m = document.getElementById('modal-contexto');
-    if (m) m.remove();
-};

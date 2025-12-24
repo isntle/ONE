@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | ONE</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script><script src="../assets/js/icons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="layout-app">
+        <header class="encabezado-app">
+            <div class="logo-app"><img src="../assets/img/ONE.ico" alt="Logo ONE"> ONE</div>
+            <div class="selector-espacios">
+                <button class="boton-espacio activo-espacio" data-espacio="Personal">
+                    <i data-app-icon="user"></i> Personal
+                </button>
+                <button class="boton-espacio" data-espacio="Escuela">
+                    <i data-app-icon="graduation-cap"></i> Escuela
+                </button>
+                <button class="boton-espacio" data-espacio="Trabajo">
+                    <i data-app-icon="briefcase"></i> Trabajo
+                </button>
+            </div>
+            <div class="usuario-superior">
+                <div class="perfil-usuario-wrapper"
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                    <span class="inicial-usuario">L</span>
+                    <span class="nombre-usuario" style="font-weight: 500;">Luis Ernesto</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="cuerpo-app">
+            <aside class="menu-lateral">
+                <h2 class="titulo-menu">Vistas</h2>
+                <nav class="nav-lateral-container">
+                    <a href="semana.html" class="opcion-menu"><i data-app-icon="calendar"></i> Semana</a>
+                    <a href="proyectos.html" class="opcion-menu"><i data-app-icon="layout-grid"></i> Proyectos</a>
+                    <a href="habitos.html" class="opcion-menu"><i data-app-icon="check-circle"></i> Hábitos</a>
+                    <a href="dashboard.html" class="opcion-menu activo-menu"><i data-app-icon="bar-chart-3"></i>
+                        Dashboard</a>
+                </nav>
+
+                <h2 class="titulo-menu">Herramientas</h2>
+                <div class="menu-inferior">
+                    <a href="focus.html" class="opcion-menu"><i data-app-icon="zap"></i> Focus Mode</a>
+                    <a href="capacidad.html" class="opcion-menu"><i data-app-icon="gauge"></i> Capacidad</a>
+                    <a href="insights.html" class="opcion-menu"><i data-app-icon="sparkles"></i> AI Insights</a>
+                </div>
+            </aside>
+
+            <main class="zona-contenido">
+                <!-- Welcome Header -->
+                <div class="welcome-card">
+                    <div>
+                        <h1>Bienvenido de vuelta </h1>
+                        <p id="fecha-actual"></p>
+                    </div>
+                    <button class="btn-primary" onclick="window.location.href='semana.html'">
+                        Ver Semana
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Quick Stats Grid -->
+                <div class="grid-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i data-lucide="check-circle-2"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label">Tareas Hoy</p>
+                            <h2 class="stat-value" id="stat-hoy">0</h2>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i data-lucide="trending-up"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label">Esta Semana</p>
+                            <h2 class="stat-value" id="stat-semana">0</h2>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <i data-lucide="clock"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label">Horas Focus</p>
+                            <h2 class="stat-value" id="stat-focus">0h</h2>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i data-lucide="flame"></i>
+                        </div>
+                        <div>
+                            <p class="stat-label">Racha</p>
+                            <h2 class="stat-value" id="stat-racha">0 días</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Trend Chart -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i data-lucide="activity"></i> Tendencia Semanal</h3>
+                        <span class="badge" id="completion-badge">0% completitud</span>
+                    </div>
+                    <canvas id="weekly-trend-chart"></canvas>
+                </div>
+
+                <!-- Space Distribution -->
+                <div class="dashboard-card">
+                    <h3><i data-lucide="target"></i> Distribución por Espacios</h3>
+                    <div id="space-distribution"></div>
+                </div>
+
+                <!-- Today's Tasks Preview -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3><i data-app-icon="calendar"></i> Tareas de Hoy</h3>
+                        <a href="semana.html" class="link-action">Ver Todas <i data-lucide="arrow-right"></i></a>
+                    </div>
+                    <div id="today-tasks-list"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions-grid">
+                    <div class="action-card" onclick="window.location.href='insights.html'">
+                        <i data-lucide="brain"></i>
+                        <h4>AI Insights</h4>
+                        <p>Análisis inteligente</p>
+                    </div>
+                    <div class="action-card" onclick="window.location.href='focus.html'">
+                        <i data-app-icon="zap"></i>
+                        <h4>Focus Mode</h4>
+                        <p>Sesión de concentración</p>
+                    </div>
+                    <div class="action-card" onclick="window.location.href='capacidad.html'">
+                        <i data-app-icon="gauge"></i>
+                        <h4>Capacidad</h4>
+                        <p>Gestión de energía</p>
+                    </div>
+                    <div class="action-card" onclick="window.location.href='proyectos.html'">
+                        <i data-lucide="folder"></i>
+                        <h4>Proyectos</h4>
+                        <p>Ver todos</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../assets/js/db.js"></script>
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <script src="../assets/js/app.js"></script>
+</body>
+
+</html>

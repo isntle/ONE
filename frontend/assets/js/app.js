@@ -14,9 +14,12 @@ function iniciarAplicacion() {
     // 2. Cargar datos de usuario en la interfaz
     cargarDatosUsuario();
 
-    // 3. Renderizar Iconos (Lucide) - GLOBAL
+    // 3. Renderizar Iconos
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+    }
+    if (typeof Icons !== 'undefined') {
+        Icons.init();
     }
 
     // 4. Configurar Navegación Global (Sidebar)

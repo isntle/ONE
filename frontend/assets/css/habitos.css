@@ -90,6 +90,89 @@
     color: var(--color-texto-blanco);
 }
 
+/* INPUT INLINE PARA NUEVO HÁBITO */
+.input-wrapper-habito {
+    background: var(--color-fondo-bloque);
+    border: 2px solid var(--color-acento);
+    box-shadow: 0 0 12px rgba(66, 145, 85, 0.25);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.input-habito {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--color-texto-blanco);
+    font-size: 0.9rem;
+    outline: none;
+    font-family: inherit;
+}
+
+.input-habito::placeholder {
+    color: var(--color-texto-tenue);
+}
+
+/* REFINAMIENTOS DE NAVEGACIÓN */
+.titulo-y-nav-habitos {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.navegacion-semana-habitos {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-nav-mini {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-texto-secundario);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-nav-mini:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-texto-blanco);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.habito-header-nombre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-nuevo-habito-mini {
+    background: var(--color-acento);
+    color: white;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+    padding-bottom: 2px;
+    /* Alineación del + */
+}
+
+.btn-nuevo-habito-mini:hover {
+    background: var(--color-acento-hover);
+    transform: scale(1.1);
+}
+
 /* Tabla GitHub Style */
 .marcas-habito {
     display: flex;

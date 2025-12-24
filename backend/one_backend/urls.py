@@ -23,6 +23,8 @@ from projects.views import ProjectViewSet
 from tasks.views import TaskViewSet
 from habits.views import HabitViewSet, HabitLogViewSet
 
+from accounts.views import RegisterView, LoginView, StreakView
+
 router = DefaultRouter()
 router.register(r'spaces', SpaceViewSet)
 router.register(r'projects', ProjectViewSet)
@@ -33,4 +35,7 @@ router.register(r'habit-logs', HabitLogViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/login/', LoginView.as_view(), name='login'),
+    path('api/streak/', StreakView.as_view(), name='streak'),
 ]

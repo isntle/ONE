@@ -22,13 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cargarTareasSetup();
     configurarBotonesModo();
-    lucide.createIcons();
+    Icons.init();
 });
 
 function cargarTareasSetup() {
     // Cargar tareas de HOY para el selector
     const select = document.getElementById('select-tarea-focus');
-    const hoy = new Date().toISOString().split('T')[0];
+    const hoy = Store.fechaIsoLocal(new Date());
     // Obtener tareas globales (de todos los espacios) o solo del actual? 
     // Mejor de todos para "Deep Work" global. O filtrado por espacio actual si queremos consistencia.
     // Usemos global filter by date = hoy
@@ -97,7 +97,7 @@ window.iniciarFocus = () => {
     // Cambiar icono pausa/play
     const btn = document.getElementById('btn-pausa');
     btn.innerHTML = '<i data-lucide="pause"></i>';
-    lucide.createIcons();
+    Icons.init();
 };
 
 function tick() {
@@ -130,7 +130,7 @@ window.pausarReanudar = () => {
     } else {
         btn.innerHTML = '<i data-lucide="pause"></i>';
     }
-    lucide.createIcons();
+    Icons.init();
 };
 
 window.detenerSesion = () => {

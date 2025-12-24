@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Proyecto | ONE</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/detalle-proyecto.css">
+    <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
+    <!-- Iconos -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/icons.js"></script>
+</head>
+
+<body>
+    <div class="layout-app">
+        <header class="encabezado-app">
+            <div class="logo-app"><img src="../assets/img/ONE.ico" alt="Logo ONE"> ONE</div>
+            <div class="selector-espacios">
+                <button class="boton-espacio activo-espacio" data-espacio="Personal">
+                    <i data-app-icon="user"></i> Personal
+                </button>
+                <button class="boton-espacio" data-espacio="Escuela">
+                    <i data-app-icon="graduation-cap"></i> Escuela
+                </button>
+                <button class="boton-espacio" data-espacio="Trabajo">
+                    <i data-app-icon="briefcase"></i> Trabajo
+                </button>
+            </div>
+            <div class="usuario-superior">
+                <div class="perfil-usuario-wrapper"
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                    <span class="inicial-usuario">L</span>
+                    <span class="nombre-usuario" style="font-weight: 500;">Luis Ernesto</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="cuerpo-app">
+            <aside class="menu-lateral">
+                <h2 class="titulo-menu">Vistas</h2>
+                <nav class="nav-lateral-container">
+                    <a href="semana.html" class="opcion-menu"><i data-app-icon="calendar"></i> Semana</a>
+                    <a href="proyectos.html" class="opcion-menu activo-menu"><i data-app-icon="layout-grid"></i>
+                        Proyectos</a>
+                    <a href="habitos.html" class="opcion-menu"><i data-app-icon="check-circle"></i> Hábitos</a>
+                    <a href="dashboard.html" class="opcion-menu"><i data-app-icon="bar-chart-3"></i> Dashboard</a>
+                </nav>
+
+                <h2 class="titulo-menu">Herramientas</h2>
+                <div class="menu-inferior">
+                    <a href="focus.html" class="opcion-menu"><i data-app-icon="zap"></i> Focus Mode</a>
+                    <a href="capacidad.html" class="opcion-menu"><i data-app-icon="gauge"></i> Capacidad</a>
+                    <a href="insights.html" class="opcion-menu"><i data-app-icon="sparkles"></i> AI Insights</a>
+                </div>
+            </aside>
+
+            <main class="zona-contenido">
+                <nav class="migas-pan">
+                    <a href="proyectos.html" class="btn-volver">
+                        <i data-lucide="arrow-left"></i> Volver a Proyectos
+                    </a>
+                </nav>
+
+                <header class="cabecera-proyecto">
+                    <div class="info-principal">
+                        <div class="indicador-proyecto" id="proyecto-color"></div>
+                        <h1 id="proyecto-titulo">Cargando proyecto...</h1>
+                    </div>
+                    <p class="meta-info">Fecha objetivo: <span id="proyecto-fecha">-- de -- de ----</span></p>
+
+                    <div class="progreso-container">
+                        <div class="progreso-labels">
+                            <span>Progreso</span>
+                            <span id="progreso-texto">0%</span>
+                        </div>
+                        <div class="progreso-barra">
+                            <div class="progreso-fill" id="progreso-barra-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <nav class="tabs-proyecto">
+                        <button class="tab-btn active" data-tab="tareas">Tareas</button>
+                        <button class="tab-btn" data-tab="notas">Notas</button>
+                    </nav>
+                </header>
+
+                <section id="tab-tareas" class="seccion-tab active">
+                    <div class="header-seccion">
+                        <h2>Tareas del Proyecto</h2>
+                        <button class="boton-primario" id="btn-añadir-tarea">
+                            <i data-lucide="plus"></i> Añadir Tarea
+                        </button>
+                    </div>
+                    <div class="lista-tareas-proyecto" id="lista-tareas">
+                        <!-- Dinámico -->
+                    </div>
+                </section>
+
+                <section id="tab-notas" class="seccion-tab">
+                    <div class="header-seccion">
+                        <h2>Notas del Proyecto</h2>
+                    </div>
+                    <div class="editor-notas-container">
+                        <div class="toolbar-editor">
+                            <button title="Header" onclick="formatear('formatBlock', 'h3')"><i
+                                    data-lucide="heading"></i></button>
+                            <button title="Negrita" onclick="formatear('bold')"><i data-lucide="bold"></i></button>
+                            <button title="Lista" onclick="formatear('insertUnorderedList')"><i
+                                    data-lucide="list"></i></button>
+                            <button title="Alinear Centro" onclick="formatear('justifyCenter')"><i
+                                    data-lucide="align-center"></i></button>
+                            <button title="Enlace" onclick="crearEnlace()"><i data-lucide="link"></i></button>
+                        </div>
+                        <div id="editor-contenido" class="editor-body" contenteditable="true"
+                            placeholder="Espacio para documentación, enlaces y notas importantes"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="../assets/js/db.js"></script>
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/detalle-proyecto.js"></script>
+    <script src="../assets/js/app.js"></script>
+</body>
+
+</html>

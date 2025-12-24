@@ -46,40 +46,48 @@ function renderizarProyectos() {
 
     if (proyectos.length === 0) {
         contenedor.innerHTML = `
-            <div style="text-align:center; padding: 40px; color: var(--color-texto-tenue);">
-                <i data-lucide="folder-open" style="width: 48px; height: 48px; margin-bottom: 10px; opacity:0.5;"></i>
-                <p>No hay proyectos en este espacio.</p>
-                <p style="font-size:0.9rem;">Crea uno nuevo para empezar.</p>
+            <div style="display:flex; align-items:center; justify-content:center; min-height:400px; text-align:center; color: var(--color-texto-tenue);">
+                <div>
+                    <i data-lucide="folder-open" style="width: 48px; height: 48px; margin-bottom: 10px; opacity:0.5;"></i>
+                    <p style="margin:10px 0;">No hay proyectos en este espacio.</p>
+                    <p style="font-size:0.9rem; opacity:0.7;">Crea uno nuevo para empezar.</p>
+                </div>
             </div>
         `;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        if (typeof lucide !== 'undefined') Icons.init();
         return;
     }
 
     proyectos.forEach(p => {
+        // Defensivo: asegurarse de que el proyecto tenga las propiedades básicas
+        if (!p || !p.titulo) {
+            console.warn('Proyecto inválido detectado:', p);
+            return;
+        }
+
         const article = document.createElement('article');
         article.className = 'tarjeta-proyecto';
-        article.style.setProperty('--color-referencia', p.color || 'var(--color-acento)');
+        article.style.setProperty('--color-referencia', p.color || '#8B5CF6');
 
         // Convertir etiquetas string a array si es necesario
-        const tags = p.etiquetas ? p.etiquetas.split(',').map(t => t.trim()) : [];
-        const tagsHtml = tags.map(t => `<span class="etiqueta-proyecto">${t}</span>`).join('');
+        const tags = p.etiquetas ? String(p.etiquetas).split(',').map(t => t.trim()).filter(t => t) : [];
+        const tagsHtml = tags.length > 0 ? tags.map(t => `<span class="etiqueta-proyecto">${t}</span>`).join('') : '';
 
         article.innerHTML = `
-            <div class="titulo-proyecto">${p.titulo}</div>
+            <div class="titulo-proyecto">${p.titulo || 'Sin título'}</div>
             <div class="detalle-proyecto">${p.descripcion || 'Sin descripción'}</div>
             <div class="etiquetas-container">
                 ${tagsHtml}
             </div>
-            <!-- Barra de progreso simulada -->
+            <!-- Barra de progreso -->
             <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 12px; overflow:hidden;">
-                <div style="height: 100%; width: ${Math.random() * 80 + 10}%; background: var(--color-referencia, var(--color-acento));"></div>
+                <div style="height: 100%; width: ${p.progreso || 0}%; background: var(--color-referencia, var(--color-acento));"></div>
             </div>
         `;
 
-        // Click para editar (futuro sprint) o detalle
+        // Click para ver detalle
         article.addEventListener('click', () => {
-            // alert('Detalle del proyecto (Próximamente)');
+            window.location.href = `detalle-proyecto.html?id=${p.id}`;
         });
 
         lista.appendChild(article);
@@ -87,11 +95,11 @@ function renderizarProyectos() {
 
     contenedor.appendChild(lista);
 
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    if (typeof lucide !== 'undefined') Icons.init();
 }
 
-// === MODAL DE CREACIÓN ===
-window.abrirModalCreacion = () => {
+// === MODAL DE CREACIÓN / EDICIÓN ===
+window.abrirModalCreacion = (proyectoEditar = null) => {
     // Si ya existe borralo
     const existente = document.getElementById('modal-proyecto');
     if (existente) existente.remove();
@@ -103,31 +111,41 @@ window.abrirModalCreacion = () => {
         if (e.target === overlay) cerrarModal();
     };
 
+    // Debug log para ver qué estamos recibiendo
+    console.log('Modal con proyecto:', proyectoEditar);
+
+    const tituloModal = proyectoEditar ? 'Editar Proyecto' : `Nuevo Proyecto En ${Store.obtenerEspacioActual()}`;
+    const valTitulo = (proyectoEditar && proyectoEditar.titulo) ? proyectoEditar.titulo : '';
+    const valDesc = (proyectoEditar && proyectoEditar.descripcion) ? proyectoEditar.descripcion : '';
+    const valTags = (proyectoEditar && proyectoEditar.etiquetas) ? proyectoEditar.etiquetas : '';
+    const idProyecto = (proyectoEditar && proyectoEditar.id) ? proyectoEditar.id : '';
+
     overlay.innerHTML = `
         <div class="modal-proyecto">
             <div class="modal-header">
-                <h3>Nuevo Proyecto En ${Store.obtenerEspacioActual()}</h3>
+                <h3>${tituloModal}</h3>
                 <button class="modal-cerrar" onclick="cerrarModal()">&times;</button>
             </div>
             
             <div class="modal-campo">
                 <label>Nombre del proyecto</label>
-                <input type="text" id="input-titulo" placeholder="Ej. Tesis, Portafolio..." autofocus>
+                <input type="text" id="input-titulo" placeholder="Ej. Tesis, Portafolio..." value="${valTitulo}" autofocus>
             </div>
             
             <div class="modal-campo">
                 <label>Descripción corta</label>
-                <textarea id="input-desc" placeholder="Objetivo principal..."></textarea>
+                <textarea id="input-desc" placeholder="Objetivo principal...">${valDesc}</textarea>
             </div>
             
             <div class="modal-campo">
                 <label>Etiquetas (separadas por coma)</label>
-                <input type="text" id="input-tags" placeholder="Urgente, Diseño, Dev">
+                <input type="text" id="input-tags" placeholder="Urgente, Diseño, Dev" value="${valTags}">
             </div>
 
             <div class="modal-acciones">
+                ${proyectoEditar ? `<button class="btn-cancelar" style="color:#EF4444; margin-right:auto;" onclick="borrarProyecto(${idProyecto})">Eliminar</button>` : ''}
                 <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn-crear" onclick="guardarProyecto()">Crear Proyecto</button>
+                <button class="btn-crear" onclick="guardarProyecto(${idProyecto})">${proyectoEditar ? 'Guardar Cambios' : 'Crear Proyecto'}</button>
             </div>
         </div>
     `;
@@ -136,7 +154,7 @@ window.abrirModalCreacion = () => {
     setTimeout(() => document.getElementById('input-titulo').focus(), 100);
 }
 
-window.guardarProyecto = () => {
+window.guardarProyecto = (idExistente) => {
     const titulo = document.getElementById('input-titulo').value.trim();
     const desc = document.getElementById('input-desc').value.trim();
     const tags = document.getElementById('input-tags').value.trim();
@@ -146,15 +164,41 @@ window.guardarProyecto = () => {
         return;
     }
 
-    Store.agregarProyecto({
-        titulo: titulo,
-        descripcion: desc,
-        etiquetas: tags,
-        color: '#8B5CF6' // Morado por defecto para proyectos
-    });
+    // Si idExistente es un número o string válido, editar. Si no, crear.
+    if (idExistente && idExistente !== '' && idExistente !== 'undefined') {
+        // Editar
+        console.log('Editando proyecto con ID:', idExistente);
+        const proyectos = Store.state.proyectos;
+        const index = proyectos.findIndex(p => p.id == idExistente);
+        if (index !== -1) {
+            proyectos[index].titulo = titulo;
+            proyectos[index].descripcion = desc;
+            proyectos[index].etiquetas = tags;
+            Store.guardarEstado();
+        }
+    } else {
+        // Crear
+        console.log('Creando nuevo proyecto');
+        Store.agregarProyecto({
+            titulo: titulo,
+            descripcion: desc,
+            etiquetas: tags,
+            color: '#8B5CF6',
+            progreso: 0
+        });
+    }
 
     cerrarModal();
     renderizarProyectos();
+}
+
+window.borrarProyecto = (id) => {
+    if (confirm('¿Eliminar proyecto?')) {
+        Store.state.proyectos = Store.state.proyectos.filter(p => p.id != id);
+        Store.guardarEstado();
+        cerrarModal();
+        renderizarProyectos();
+    }
 }
 
 window.cerrarModal = () => {

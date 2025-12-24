@@ -9,73 +9,109 @@
     <link rel="stylesheet" href="../assets/css/capacidad.css">
     <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script><script src="../assets/js/icons.js"></script>
 </head>
 
 <body>
     <div class="layout-app">
         <header class="encabezado-app">
             <div class="logo-app"><img src="../assets/img/ONE.ico" alt="Logo ONE"> ONE</div>
-            <nav class="menu-superior">
-                <a href="semana.html" class="enlace-superior"><i data-lucide="arrow-left"></i> Volver</a>
-            </nav>
+            <div class="selector-espacios">
+                <button class="boton-espacio activo-espacio" data-espacio="Personal">
+                    <i data-app-icon="user"></i> Personal
+                </button>
+                <button class="boton-espacio" data-espacio="Escuela">
+                    <i data-app-icon="graduation-cap"></i> Escuela
+                </button>
+                <button class="boton-espacio" data-espacio="Trabajo">
+                    <i data-app-icon="briefcase"></i> Trabajo
+                </button>
+            </div>
+            <div class="usuario-superior">
+                <div class="perfil-usuario-wrapper"
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                    <span class="inicial-usuario">L</span>
+                    <span class="nombre-usuario" style="font-weight: 500;">Luis Ernesto</span>
+                </div>
+            </div>
         </header>
 
-        <main class="cuerpo-app vista-capacidad">
-            <h1 class="titulo-seccion">Análisis de Capacidad</h1>
-            <p class="subtitulo-seccion">Balance de tu carga laboral vs. tu energía disponible</p>
+        <div class="cuerpo-app">
+            <aside class="menu-lateral">
+                <h2 class="titulo-menu">Vistas</h2>
+                <nav class="nav-lateral-container">
+                    <a href="semana.html" class="opcion-menu"><i data-app-icon="calendar"></i> Semana</a>
+                    <a href="proyectos.html" class="opcion-menu"><i data-app-icon="layout-grid"></i> Proyectos</a>
+                    <a href="habitos.html" class="opcion-menu"><i data-app-icon="check-circle"></i> Hábitos</a>
+                    <a href="dashboard.html" class="opcion-menu"><i data-app-icon="bar-chart-3"></i> Dashboard</a>
+                </nav>
 
-            <!-- Configuración Rápida -->
-            <section class="config-capacidad">
-                <label>Mi límite diario productivo:</label>
-                <div class="input-horas-wrapper">
-                    <input type="number" id="input-horas-productivas" value="6" min="1" max="12"
-                        onchange="calcularCapacidad()">
-                    <span>horas</span>
+                <h2 class="titulo-menu">Herramientas</h2>
+                <div class="menu-inferior">
+                    <a href="focus.html" class="opcion-menu"><i data-app-icon="zap"></i> Focus Mode</a>
+                    <a href="capacidad.html" class="opcion-menu activo-menu"><i data-app-icon="gauge"></i> Capacidad</a>
+                    <a href="insights.html" class="opcion-menu"><i data-app-icon="sparkles"></i> AI Insights</a>
                 </div>
-            </section>
+            </aside>
 
-            <!-- Semáforo Dinámico -->
-            <section class="semaforo-container">
-                <div class="luz rojo" id="luz-rojo">
-                    <i data-lucide="alert-circle"></i>
-                    <span>Sobrecarga</span>
-                </div>
-                <div class="luz amarillo" id="luz-amarillo">
-                    <i data-lucide="minus-circle"></i>
-                    <span>Denso</span>
-                </div>
-                <div class="luz verde activo" id="luz-verde"> <!-- Default activo -->
-                    <i data-lucide="check-circle"></i>
-                    <span>Óptimo</span>
-                </div>
-            </section>
+            <main class="zona-contenido vista-capacidad">
+                <h1 class="titulo-seccion">Análisis de Capacidad</h1>
+                <p class="subtitulo-seccion">Balance de tu carga laboral vs. tu energía disponible</p>
 
-            <!-- Resultados -->
-            <section class="dashboard-analisis">
-                <div class="tarjeta-dato">
-                    <h3>Carga estimada hoy</h3>
-                    <div class="dato-grande" id="dato-carga-hoy">0h</div>
-                    <p class="nota-dato">Basado en tareas</p>
-                </div>
+                <!-- Configuración Rápida -->
+                <section class="config-capacidad">
+                    <label>Mi límite diario productivo:</label>
+                    <div class="input-horas-wrapper">
+                        <input type="number" id="input-horas-productivas" value="6" min="1" max="12"
+                            onchange="calcularCapacidad()">
+                        <span>horas</span>
+                    </div>
+                </section>
 
-                <div class="tarjeta-dato">
-                    <h3>Estado</h3>
-                    <div class="dato-grande" id="dato-estado-texto" style="color:var(--color-acento);">Libre</div>
-                    <p class="nota-dato" id="dato-recomendacion">Puedes añadir más tareas.</p>
-                </div>
-            </section>
+                <!-- Semáforo Dinámico -->
+                <section class="semaforo-container">
+                    <div class="luz rojo" id="luz-rojo">
+                        <i data-lucide="alert-circle"></i>
+                        <span>Sobrecarga</span>
+                    </div>
+                    <div class="luz amarillo" id="luz-amarillo">
+                        <i data-lucide="minus-circle"></i>
+                        <span>Denso</span>
+                    </div>
+                    <div class="luz verde activo" id="luz-verde"> <!-- Default activo -->
+                        <i data-app-icon="check-circle"></i>
+                        <span>Óptimo</span>
+                    </div>
+                </section>
 
-            <!-- Predicción Semanal (Mini Heatmap) -->
-            <section class="prediccion-semana">
-                <h3>Predicción de la Semana</h3>
-                <div class="grid-dias-capacidad" id="grid-prediccion">
-                    <!-- Renderizado por JS -->
-                </div>
-            </section>
+                <!-- Resultados -->
+                <section class="dashboard-analisis">
+                    <div class="tarjeta-dato">
+                        <h3>Carga estimada hoy</h3>
+                        <div class="dato-grande" id="dato-carga-hoy">0h</div>
+                        <p class="nota-dato">Basado en tareas</p>
+                    </div>
 
-        </main>
+                    <div class="tarjeta-dato">
+                        <h3>Estado</h3>
+                        <div class="dato-grande" id="dato-estado-texto" style="color:var(--color-acento);">Libre</div>
+                        <p class="nota-dato" id="dato-recomendacion">Puedes añadir más tareas.</p>
+                    </div>
+                </section>
+
+                <!-- Predicción Semanal (Mini Heatmap) -->
+                <section class="prediccion-semana">
+                    <h3>Predicción de la Semana</h3>
+                    <div class="grid-dias-capacidad" id="grid-prediccion">
+                        <!-- Renderizado por JS -->
+                    </div>
+                </section>
+
+            </main>
+        </div>
     </div>
 
+    <script src="../assets/js/db.js"></script>
     <script src="../assets/js/store.js"></script>
     <script src="../assets/js/capacidad.js"></script>
     <script src="../assets/js/app.js"></script>

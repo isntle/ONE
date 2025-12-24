@@ -9,91 +9,123 @@
     <link rel="stylesheet" href="../assets/css/focus.css">
     <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest"></script><script src="../assets/js/icons.js"></script>
 </head>
 
 <body>
     <div class="layout-app">
         <header class="encabezado-app">
             <div class="logo-app"><img src="../assets/img/ONE.ico" alt="Logo ONE"> ONE</div>
-            <nav class="menu-superior">
-                <a href="semana.html" class="enlace-superior" onclick="confirmarSalida(event)">
-                    <i data-lucide="arrow-left" style="width:20px;"></i>
-                    <span style="font-size:0.9rem; margin-left:4px;">Salir</span>
-                </a>
-            </nav>
+            <div class="selector-espacios">
+                <button class="boton-espacio activo-espacio" data-espacio="Personal">
+                    <i data-app-icon="user"></i> Personal
+                </button>
+                <button class="boton-espacio" data-espacio="Escuela">
+                    <i data-app-icon="graduation-cap"></i> Escuela
+                </button>
+                <button class="boton-espacio" data-espacio="Trabajo">
+                    <i data-app-icon="briefcase"></i> Trabajo
+                </button>
+            </div>
+            <div class="usuario-superior">
+                <div class="perfil-usuario-wrapper"
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                    <span class="inicial-usuario">L</span>
+                    <span class="nombre-usuario" style="font-weight: 500;">Luis Ernesto</span>
+                </div>
+            </div>
         </header>
 
-        <main class="cuerpo-app vista-focus">
-            <!-- Selector de Configuración (Antes de empezar) -->
-            <section id="configuracion-focus" class="panel-configuracion">
-                <h2>Configura tu sesión</h2>
+        <div class="cuerpo-app">
+            <aside class="menu-lateral">
+                <h2 class="titulo-menu">Vistas</h2>
+                <nav class="nav-lateral-container">
+                    <a href="semana.html" class="opcion-menu"><i data-app-icon="calendar"></i> Semana</a>
+                    <a href="proyectos.html" class="opcion-menu"><i data-app-icon="layout-grid"></i> Proyectos</a>
+                    <a href="habitos.html" class="opcion-menu"><i data-app-icon="check-circle"></i> Hábitos</a>
+                    <a href="dashboard.html" class="opcion-menu"><i data-app-icon="bar-chart-3"></i> Dashboard</a>
+                </nav>
 
-                <div class="grupo-config">
-                    <label>¿En qué vas a trabajar?</label>
-                    <select id="select-tarea-focus">
-                        <option value="">-- Selecciona una tarea de hoy --</option>
-                        <!-- Se llena dinámicamente -->
-                    </select>
+                <h2 class="titulo-menu">Herramientas</h2>
+                <div class="menu-inferior">
+                    <a href="focus.html" class="opcion-menu activo-menu"><i data-app-icon="zap"></i> Focus Mode</a>
+                    <a href="capacidad.html" class="opcion-menu"><i data-app-icon="gauge"></i> Capacidad</a>
+                    <a href="insights.html" class="opcion-menu"><i data-app-icon="sparkles"></i> AI Insights</a>
                 </div>
+            </aside>
 
-                <div class="grupo-config">
-                    <label>Intensidad</label>
-                    <div class="botones-modo">
-                        <button class="btn-modo activo" data-min="25" data-descanso="5">Pomodoro (25/5)</button>
-                        <button class="btn-modo" data-min="50" data-descanso="10">Extendido (50/10)</button>
-                        <button class="btn-modo" data-min="90" data-descanso="15">Profundo (90/15)</button>
+            <main class="zona-contenido vista-focus">
+                <!-- Selector de Configuración (Antes de empezar) -->
+                <section id="configuracion-focus" class="panel-configuracion">
+                    <h2>Configura tu sesión</h2>
+
+                    <div class="grupo-config">
+                        <label>¿En qué vas a trabajar?</label>
+                        <select id="select-tarea-focus">
+                            <option value="">-- Selecciona una tarea de hoy --</option>
+                            <!-- Se llena dinámicamente -->
+                        </select>
                     </div>
-                </div>
 
-                <button class="boton-primario btn-iniciar" onclick="iniciarFocus()">
-                    <i data-lucide="play"></i> Iniciar Sesión
-                </button>
-            </section>
-
-            <!-- Vista Activa (Timer + Audio) -->
-            <section id="sesion-activa" class="panel-sesion" style="display:none;">
-                <div class="tarea-actual-display">
-                    <span class="etiqueta-enfocada">ENFOCADO EN</span>
-                    <h1 id="titulo-tarea-activa">Sin Tarea</h1>
-                </div>
-
-                <div class="visualizador-timer">
-                    <!-- Círculo SVG animado -->
-                    <svg class="progress-ring" width="300" height="300">
-                        <circle class="progress-ring__circle" stroke="var(--color-acento)" stroke-width="8"
-                            fill="transparent" r="140" cx="150" cy="150" />
-                    </svg>
-                    <div class="tiempo-central" id="display-tiempo">25:00</div>
-                </div>
-
-                <div class="controles-sesion">
-                    <button class="btn-control" onclick="pausarReanudar()" id="btn-pausa"><i
-                            data-lucide="pause"></i></button>
-                    <button class="btn-control btn-terminar" onclick="detenerSesion()"><i
-                            data-lucide="square"></i></button>
-                </div>
-
-                <div class="mixer-audio">
-                    <p>Ambiente Sonoro</p>
-                    <div class="botones-audio">
-                        <button class="btn-audio" onclick="toggleAudio('lluvia')" title="Lluvia"><i
-                                data-lucide="cloud-rain"></i></button>
-                        <button class="btn-audio" onclick="toggleAudio('fuego')" title="Fuego"><i
-                                data-lucide="flame"></i></button>
-                        <button class="btn-audio" onclick="toggleAudio('cafe')" title="Cafetería"><i
-                                data-lucide="coffee"></i></button>
+                    <div class="grupo-config">
+                        <label>Intensidad</label>
+                        <div class="botones-modo">
+                            <button class="btn-modo activo" data-min="25" data-descanso="5">Pomodoro (25/5)</button>
+                            <button class="btn-modo" data-min="50" data-descanso="10">Extendido (50/10)</button>
+                            <button class="btn-modo" data-min="90" data-descanso="15">Profundo (90/15)</button>
+                        </div>
                     </div>
-                </div>
-            </section>
-        </main>
+
+                    <button class="boton-primario btn-iniciar" onclick="iniciarFocus()">
+                        <i data-lucide="play"></i> Iniciar Sesión
+                    </button>
+                </section>
+
+                <!-- Vista Activa (Timer + Audio) -->
+                <section id="sesion-activa" class="panel-sesion" style="display:none;">
+                    <div class="tarea-actual-display">
+                        <span class="etiqueta-enfocada">ENFOCADO EN</span>
+                        <h1 id="titulo-tarea-activa">Sin Tarea</h1>
+                    </div>
+
+                    <div class="visualizador-timer">
+                        <!-- Círculo SVG animado -->
+                        <svg class="progress-ring" width="300" height="300">
+                            <circle class="progress-ring__circle" stroke="var(--color-acento)" stroke-width="8"
+                                fill="transparent" r="140" cx="150" cy="150" />
+                        </svg>
+                        <div class="tiempo-central" id="display-tiempo">25:00</div>
+                    </div>
+
+                    <div class="controles-sesion">
+                        <button class="btn-control" onclick="pausarReanudar()" id="btn-pausa"><i
+                                data-lucide="pause"></i></button>
+                        <button class="btn-control btn-terminar" onclick="detenerSesion()"><i
+                                data-app-icon="square"></i></button>
+                    </div>
+
+                    <div class="mixer-audio">
+                        <p>Ambiente Sonoro</p>
+                        <div class="botones-audio">
+                            <button class="btn-audio" onclick="toggleAudio('lluvia')" title="Lluvia"><i
+                                    data-lucide="cloud-rain"></i></button>
+                            <button class="btn-audio" onclick="toggleAudio('fuego')" title="Fuego"><i
+                                    data-lucide="flame"></i></button>
+                            <button class="btn-audio" onclick="toggleAudio('cafe')" title="Cafetería"><i
+                                    data-lucide="coffee"></i></button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
-    <!-- Audios ocultos (placeholders) -->
-    <audio id="audio-lluvia" loop src="https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-1253.mp3"></audio>
-    <audio id="audio-fuego" loop src="https://assets.mixkit.co/sfx/preview/mixkit-campfire-crackles-1330.mp3"></audio>
-    <audio id="audio-cafe" loop
-        src="https://assets.mixkit.co/sfx/preview/mixkit-restaurant-ambience-loop-1325.mp3"></audio>
+    <!-- Audios locales -->
+    <audio id="audio-lluvia" loop src="../assets/audio/lluvia.mp3"></audio>
+    <audio id="audio-fuego" loop src="../assets/audio/fuego.mp3"></audio>
+    <audio id="audio-cafe" loop src="../assets/audio/cafe.mp3"></audio>
 
+    <script src="../assets/js/db.js"></script>
     <script src="../assets/js/store.js"></script>
     <script src="../assets/js/focus.js"></script>
     <script src="../assets/js/app.js"></script>

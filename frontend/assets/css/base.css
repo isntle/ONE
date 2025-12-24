@@ -60,86 +60,70 @@ body {
 }
 
 .logo-app {
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
     color: #B69AD2;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
-.logo-app i,
 .logo-app img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-}
-
-.menu-superior {
-    display: flex;
-    gap: 20px;
-}
-
-.enlace-superior {
-    text-decoration: none;
-    color: var(--color-texto-secundario);
-    padding: 8px;
-    border-radius: 8px;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.enlace-superior:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--color-texto-blanco);
-}
-
-.enlace-superior.enlace-activa {
-    color: var(--color-texto-blanco);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.enlace-superior i {
-    width: 20px;
-    height: 20px;
-    stroke-width: 2px;
+    height: 32px;
+    filter: brightness(1.2);
 }
 
 /* SELECTOR DE ESPACIOS EN HEADER */
 .selector-espacios {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .boton-espacio {
-    padding: 8px 14px;
+    padding: 10px 18px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
+    border: 1px solid transparent;
+    border-radius: 10px;
     color: var(--color-texto-secundario);
     font-size: 0.85rem;
+    font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: all 0.2s;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
 }
 
 .boton-espacio:hover {
-    background: rgba(255, 255, 255, 0.05);
     color: var(--color-texto-blanco);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .boton-espacio.activo-espacio {
     background: var(--color-acento);
     color: var(--color-texto-blanco);
-    border-color: var(--color-acento);
+    box-shadow: 0 4px 12px rgba(66, 145, 85, 0.3);
+}
+
+.boton-espacio i {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.boton-espacio i svg {
+    width: 100%;
+    height: 100%;
 }
 
 .usuario-superior {
@@ -149,8 +133,8 @@ body {
 }
 
 .inicial-usuario {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background-color: var(--color-acento);
     color: var(--color-texto-blanco);
@@ -158,7 +142,8 @@ body {
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1rem;
+    box-shadow: 0 0 15px rgba(66, 145, 85, 0.4);
 }
 
 .nombre-usuario {
@@ -211,7 +196,14 @@ body {
 .opcion-menu i {
     width: 18px;
     height: 18px;
-    stroke-width: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.opcion-menu i svg {
+    width: 100%;
+    height: 100%;
 }
 
 .opcion-menu:hover {
@@ -228,7 +220,50 @@ body {
 .zona-contenido {
     flex: 1;
     padding: 32px 40px;
-    overflow-y: auto;
+    overflow-y: scroll;
+    /* Forzar scrollbar para evitar saltos de layout */
+    height: calc(100vh - 73px);
+    /* Altura exacta restando el header */
+}
+
+/* COMPONENTES COMUNES (Dashboard / Insights) */
+.dashboard-card {
+    background: var(--color-fondo-tarjeta);
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+/* BLOQUE SUPERIOR REFINADO */
+.titulo-seccion-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.info-titular h1 {
+    margin-bottom: 8px;
+}
+
+.dashboard-card h3 {
+    color: var(--color-texto-blanco);
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge {
+    display: inline-block;
+    background: var(--color-fondo-panel);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 /* BOTONES GENERALES */

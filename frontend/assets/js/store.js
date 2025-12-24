@@ -141,7 +141,7 @@ const Store = {
             const day = d.getDay();
             const diff = d.getDate() - day + (day === 0 ? -6 : 1) + diaIndex;
             const fecha = new Date(d.setDate(diff));
-            return fecha.toISOString().split('T')[0];
+            return Store.fechaIsoLocal(fecha);
         };
 
         const LUNES = getFechaSemana(0);
@@ -151,22 +151,23 @@ const Store = {
 
         Store.state.tareas = [
             // ESCUELA
-            { id: 1, titulo: "Probabilidad", descripcion: "Ejercicios Tarea 2", espacio: "Escuela", fecha: LUNES, horaInicio: "16:00", horaFin: "18:00", tipo: "horario-escuela" },
-            { id: 2, titulo: "Redes", descripcion: "Topología Packet Tracer", espacio: "Escuela", fecha: MARTES, horaInicio: "14:00", horaFin: "16:00", tipo: "horario-escuela" },
-            { id: 3, titulo: "Métodos Numéricos", descripcion: "Práctica Gauss-Jordan", espacio: "Escuela", fecha: MIERCOLES, horaInicio: "15:00", horaFin: "17:00", tipo: "horario-escuela" },
+            { id: 1, titulo: "Probabilidad", descripcion: "Ejercicios Tarea 2", espacio: "Escuela", fecha: LUNES, horaInicio: "16:00", horaFin: "18:00", tipo: "horario-escuela", completada: false, color: "azul" },
+            { id: 2, titulo: "Redes", descripcion: "Topología Packet Tracer", espacio: "Escuela", fecha: MARTES, horaInicio: "14:00", horaFin: "16:00", tipo: "horario-escuela", completada: false, color: "azul" },
+            { id: 3, titulo: "Métodos Numéricos", descripcion: "Práctica Gauss-Jordan", espacio: "Escuela", fecha: MIERCOLES, horaInicio: "15:00", horaFin: "17:00", tipo: "horario-escuela", completada: false, color: "azul" },
 
             // PERSONAL
-            { id: 4, titulo: "Gimnasio", descripcion: "Rutina tren superior", espacio: "Personal", fecha: LUNES, horaInicio: "19:00", horaFin: "20:00", tipo: "horario-personal" },
-            { id: 5, titulo: "Fútbol", descripcion: "Partido con amigos", espacio: "Personal", fecha: VIERNES, horaInicio: "20:00", horaFin: "22:00", tipo: "horario-personal" },
+            { id: 4, titulo: "Gimnasio", descripcion: "Rutina tren superior", espacio: "Personal", fecha: LUNES, horaInicio: "19:00", horaFin: "20:00", tipo: "horario-personal", completada: false, color: "rosa" },
+            { id: 5, titulo: "Fútbol", descripcion: "Partido con amigos", espacio: "Personal", fecha: VIERNES, horaInicio: "20:00", horaFin: "22:00", tipo: "horario-personal", completada: false, color: "verde" },
 
             // TRABAJO
-            { id: 6, titulo: "Reunión de equipo", descripcion: "Sprint Planning", espacio: "Trabajo", fecha: LUNES, horaInicio: "09:00", horaFin: "10:00", tipo: "horario-trabajo" },
-            { id: 7, titulo: "Desarrollo Frontend", descripcion: "Componentes React", espacio: "Trabajo", fecha: MIERCOLES, horaInicio: "10:00", horaFin: "13:00", tipo: "horario-trabajo" }
+            { id: 6, titulo: "Reunión de equipo", descripcion: "Sprint Planning", espacio: "Trabajo", fecha: LUNES, horaInicio: "09:00", horaFin: "10:00", tipo: "horario-trabajo", completada: false, color: "amarillo" },
+            { id: 7, titulo: "Desarrollo Frontend", descripcion: "Componentes React", espacio: "Trabajo", fecha: MIERCOLES, horaInicio: "10:00", horaFin: "13:00", tipo: "horario-trabajo", completada: false, color: "morado" }
         ];
 
         Store.state.proyectos = [
-            { id: 1, titulo: "Minishell en C", descripcion: "Sistemas Operativos", espacio: "Escuela", etiquetas: "C · SysOp" },
-            { id: 2, titulo: "Portafolio Web", descripcion: "Rediseño personal", espacio: "Trabajo", etiquetas: "Web · Design" }
+            { id: 1, titulo: "Minishell en C", descripcion: "Sistemas Operativos", espacio: "Escuela", etiquetas: "C, SysOp", color: "#3B82F6", progreso: 45 },
+            { id: 2, titulo: "Portafolio Web", descripcion: "Rediseño personal", espacio: "Trabajo", etiquetas: "Web, Design", color: "#8B5CF6", progreso: 70 },
+            { id: 3, titulo: "Proyecto Gym", descripcion: "Rutina de entrenamiento", espacio: "Personal", etiquetas: "Salud, Fitness", color: "#EC4899", progreso: 30 }
         ];
 
         Store.state.habitos = [
@@ -190,6 +191,16 @@ const Store = {
         ];
 
         Store.guardarEstado();
+    },
+
+    // --- FECHAS ---
+    // ISO local YYYY-MM-DD (evita desfases por zona horaria con toISOString)
+    fechaIsoLocal: (fecha) => {
+        const f = new Date(fecha);
+        const y = f.getFullYear();
+        const m = String(f.getMonth() + 1).padStart(2, '0');
+        const d = String(f.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
     },
 
     // --- HÁBITOS HELPERS ---

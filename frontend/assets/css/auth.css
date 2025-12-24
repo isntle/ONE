@@ -1,0 +1,121 @@
+/* 
+ * auth.css
+ * Estilos específicos para Login y Registro
+ */
+
+.vista-auth {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-fondo);
+    padding: 20px;
+}
+
+.contenedor-auth {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--color-fondo-panel);
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+}
+
+.logo-auth {
+    display: flex;
+    flex-direction: column;
+    /* Icono arriba del texto */
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    /* Espacio uniforme entre logo y texto */
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #B69AD2;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.logo-auth i,
+.logo-auth img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+}
+
+.titulo-auth {
+    font-size: 1.4rem;
+    color: var(--color-texto-blanco);
+    margin-bottom: 8px;
+}
+
+.subtitulo-auth {
+    font-size: 0.95rem;
+    color: var(--color-texto-secundario);
+    line-height: 1.5;
+}
+
+.formulario-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+.grupo-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.etiqueta-input {
+    font-size: 0.9rem;
+    color: var(--color-texto-secundario);
+    font-weight: 500;
+}
+
+.input-auth {
+    padding: 12px 14px;
+    border-radius: 8px;
+    background-color: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto-principal);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.input-auth:focus {
+    outline: none;
+    border-color: var(--color-acento);
+}
+
+.boton-completo {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.pie-auth {
+    font-size: 0.9rem;
+    color: var(--color-texto-tenue);
+    margin-top: 10px;
+}
+
+.enlace-auth {
+    color: var(--color-acento);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.enlace-auth:hover {
+    text-decoration: underline;
+}

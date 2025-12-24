@@ -1,0 +1,195 @@
+/* capacidad.css */
+
+.vista-capacidad {
+    flex-direction: column;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.titulo-seccion {
+    color: var(--color-texto-blanco);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.subtitulo-seccion {
+    color: var(--color-texto-secundario);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+}
+
+.config-capacidad {
+    background: var(--color-fondo-panel);
+    padding: 16px 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid var(--color-borde);
+    margin-bottom: 30px;
+}
+
+.input-horas-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-fondo);
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+}
+
+#input-horas-productivas {
+    background: transparent;
+    border: none;
+    color: var(--color-texto-blanco);
+    width: 40px;
+    font-size: 1.1rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+/* Semáforo Visual */
+.semaforo-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.luz {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--color-fondo-bloque);
+    border: 4px solid #1E1F29;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-texto-tenue);
+    opacity: 0.4;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.luz i {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 4px;
+}
+
+.luz span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Estados Activos */
+.luz.verde.activo {
+    background: #000;
+    border-color: #429155;
+    color: #429155;
+    opacity: 1;
+    box-shadow: 0 0 30px rgba(66, 145, 85, 0.4), inset 0 0 20px rgba(66, 145, 85, 0.2);
+    transform: scale(1.1);
+}
+
+.luz.amarillo.activo {
+    background: #000;
+    border-color: #F59E0B;
+    color: #F59E0B;
+    opacity: 1;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.4), inset 0 0 20px rgba(245, 158, 11, 0.2);
+    transform: scale(1.1);
+}
+
+.luz.rojo.activo {
+    background: #000;
+    border-color: #EF4444;
+    color: #EF4444;
+    opacity: 1;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), inset 0 0 20px rgba(239, 68, 68, 0.2);
+    transform: scale(1.1);
+}
+
+/* Dashboard */
+.dashboard-analisis {
+    display: flex;
+    width: 100%;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.tarjeta-dato {
+    flex: 1;
+    background: var(--color-fondo-tarjeta);
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid var(--color-borde);
+    text-align: center;
+}
+
+.dato-grande {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-texto-blanco);
+    margin: 10px 0;
+}
+
+.nota-dato {
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario);
+}
+
+/* Grid Predicción */
+.prediccion-semana {
+    width: 100%;
+}
+
+.prediccion-semana h3 {
+    margin-bottom: 16px;
+    font-size: 1rem;
+    color: var(--color-texto-blanco);
+}
+
+.grid-dias-capacidad {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.dia-cap {
+    flex: 1;
+    background: var(--color-fondo-panel);
+    padding: 12px 8px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--color-borde);
+    position: relative;
+}
+
+.dia-cap.denso {
+    border-color: #F59E0B;
+}
+
+.dia-cap.full {
+    border-color: #EF4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.cap-barra {
+    height: 4px;
+    background: #333;
+    margin-top: 8px;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.cap-progreso {
+    height: 100%;
+    background: var(--color-texto-tenue);
+}

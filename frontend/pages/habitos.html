@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hábitos | ONE</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/habitos.css">
+    <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
+    <!-- Iconos -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="layout-app">
+        <header class="encabezado-app">
+            <div class="logo-app"><img src="../assets/img/ONE.ico" alt="Logo ONE"> ONE</div>
+            <nav class="menu-superior">
+                <a href="semana.html" class="enlace-superior" title="Semana">
+                    <i data-lucide="calendar"></i>
+                </a>
+                <a href="proyectos.html" class="enlace-superior" title="Proyectos">
+                    <i data-lucide="layout-grid"></i>
+                </a>
+                <a href="habitos.html" class="enlace-superior enlace-activa" title="Hábitos">
+                    <i data-lucide="check-circle"></i>
+                </a>
+                <a href="productividad.html" class="enlace-superior" title="Resumen">
+                    <i data-lucide="bar-chart-3"></i>
+                </a>
+            </nav>
+            <div class="selector-espacios">
+                <button class="boton-espacio activo-espacio" data-espacio="Personal">
+                    <i data-lucide="user" style="width:16px; height:16px;"></i> Personal
+                </button>
+                <button class="boton-espacio" data-espacio="Escuela">
+                    <i data-lucide="graduation-cap" style="width:16px; height:16px;"></i> Escuela
+                </button>
+                <button class="boton-espacio" data-espacio="Trabajo">
+                    <i data-lucide="briefcase" style="width:16px; height:16px;"></i> Trabajo
+                </button>
+            </div>
+            <div class="usuario-superior">
+                <a href="perfil.html" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                    <span class="inicial-usuario">L</span>
+                    <span class="nombre-usuario">Luis Ernesto</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="cuerpo-app">
+            <aside class="menu-lateral">
+                <h2 class="titulo-menu">Vistas</h2>
+                <a href="semana.html" class="opcion-menu"><i data-lucide="calendar"></i> Semana</a>
+                <a href="proyectos.html" class="opcion-menu"><i data-lucide="layout-grid"></i> Proyectos</a>
+                <a href="habitos.html" class="opcion-menu activo-menu"><i data-lucide="check-circle"></i> Hábitos</a>
+                <a href="productividad.html" class="opcion-menu"><i data-lucide="bar-chart-3"></i> Resumen</a>
+
+                <h2 class="titulo-menu">Herramientas</h2>
+                <a href="focus.html" class="opcion-menu"><i data-lucide="timer"></i> Focus Mode</a>
+                <a href="capacidad.html" class="opcion-menu"><i data-lucide="gauge"></i> Capacidad</a>
+            </aside>
+
+            <main class="zona-contenido vista-habitos">
+                <section class="cabecera-vista">
+                    <div>
+                        <h1>Hábitos de esta semana</h1>
+                        <p>Constancia en estudio, salud y proyectos personales.</p>
+                    </div>
+                    <div class="controles-vista">
+                        <button class="boton-primario">Nuevo hábito</button>
+                        <button class="boton-secundario">Ver historial</button>
+                    </div>
+                </section>
+
+                <section class="bloques-resumen-habitos">
+                    <article>
+                        <h3>Racha más larga</h3>
+                        <p class="dato-habito">12 días</p>
+                        <p class="nota-habito">Estudiar inglés</p>
+                    </article>
+                    <article>
+                        <h3>Hábitos activos</h3>
+                        <p class="dato-habito">5</p>
+                        <p class="nota-habito">Estudio, salud y foco.</p>
+                    </article>
+                    <article>
+                        <h3>Días perfectos</h3>
+                        <p class="dato-habito">3</p>
+                        <p class="nota-habito">Apunta a 5 esta semana.</p>
+                    </article>
+                </section>
+
+                <section class="cuadro-habitos">
+                    <header>
+                        <div>Hábito</div>
+                        <div class="encabezado-dias">
+                            <span>L</span>
+                            <span>M</span>
+                            <span>Mi</span>
+                            <span>J</span>
+                            <span>V</span>
+                            <span>S</span>
+                            <span>D</span>
+                        </div>
+                    </header>
+                    <!-- Filas generadas por habitos.js -->
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/habitos.js"></script>
+    <script src="../assets/js/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,346 @@
+/* 
+ * semana.css
+ * Estilos específicos para la vista de Semana
+ */
+
+/* CONTENEDOR VISTA */
+.vista-semana {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* CABECERA ESPECÍFICA DE VISTA */
+.cabecera-vista {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.cabecera-vista h1 {
+    font-size: 1.7rem;
+    color: var(--color-texto-blanco);
+    margin-bottom: 4px;
+}
+
+.cabecera-vista p {
+    font-size: 0.95rem;
+    color: var(--color-texto-secundario);
+}
+
+.controles-vista {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* REJILLA SEMANAL */
+.rejilla-semana {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.rejilla-semana article {
+    background-color: var(--color-fondo-tarjeta);
+    border-radius: 14px;
+    padding: 12px 10px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rejilla-semana article>header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.nombre-dia {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-texto-blanco);
+}
+
+.fecha-dia {
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario);
+}
+
+.rejilla-semana ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* BLOQUE DE TAREA */
+.bloque {
+    border-radius: 10px;
+    padding: 8px 9px;
+    background-color: var(--color-fondo-bloque);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    border-left: 3px solid var(--color-acento);
+}
+
+.bloque:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.titulo-bloque {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-texto-blanco);
+}
+
+.bloque p {
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario);
+}
+
+.bloque span {
+    font-size: 0.8rem;
+    color: #D7FDE0;
+}
+
+/* COLORES DE BORDE PARA TAREAS */
+.color-verde {
+    border-left-color: #429155 !important;
+}
+
+.color-azul {
+    border-left-color: #3B82F6 !important;
+}
+
+.color-morado {
+    border-left-color: #8B5CF6 !important;
+}
+
+.color-rosa {
+    border-left-color: #EC4899 !important;
+}
+
+.color-amarillo {
+    border-left-color: #F59E0B !important;
+}
+
+.color-rojo {
+    border-left-color: #EF4444 !important;
+}
+
+/* Fallback por espacio */
+.horario-escuela {
+    border-left-color: var(--color-acento);
+}
+
+.horario-personal {
+    border-left-color: #B69AD2;
+}
+
+.horario-trabajo {
+    border-left-color: #F59E0B;
+}
+
+/* ESTILO FIGMA PARA AGREGAR TAREAS */
+.boton-agregar-tarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--color-texto-secundario);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    margin-top: auto;
+    font-family: inherit;
+}
+
+.boton-agregar-tarea:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-texto-blanco);
+}
+
+.input-tarea-figma {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--color-fondo-bloque);
+    border: 2px solid #3B82F6;
+    border-radius: 10px;
+    color: var(--color-texto-blanco);
+    font-size: 0.9rem;
+    outline: none;
+    font-family: inherit;
+    margin-top: 4px;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+}
+
+.input-tarea-figma::placeholder {
+    color: var(--color-texto-tenue);
+}
+
+/* MODAL DE EDICIÓN DE TAREA */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-tarea {
+    background: var(--color-fondo-tarjeta);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--color-borde);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    font-size: 1.1rem;
+    color: var(--color-texto-blanco);
+    margin: 0;
+}
+
+.modal-cerrar {
+    background: none;
+    border: none;
+    color: var(--color-texto-secundario);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal-cerrar:hover {
+    color: var(--color-texto-blanco);
+}
+
+.modal-campo {
+    margin-bottom: 16px;
+}
+
+.modal-campo label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--color-texto-secundario);
+    margin-bottom: 6px;
+}
+
+.modal-campo input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--color-fondo-bloque);
+    border: 1px solid var(--color-borde);
+    border-radius: 8px;
+    color: var(--color-texto-blanco);
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.modal-campo input:focus {
+    outline: none;
+    border-color: var(--color-acento);
+}
+
+/* SELECTOR DE COLORES */
+.selector-colores {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.color-opcion {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-opcion:hover {
+    transform: scale(1.1);
+}
+
+.color-opcion.seleccionado {
+    border-color: var(--color-texto-blanco);
+    transform: scale(1.15);
+}
+
+/* ACCIONES DEL MODAL */
+.modal-acciones {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-acciones button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.btn-guardar {
+    background: var(--color-acento);
+    color: var(--color-texto-blanco);
+    border: none;
+}
+
+.btn-guardar:hover {
+    background: var(--color-acento-hover);
+}
+
+.btn-eliminar {
+    background: transparent;
+    color: #EF4444;
+    border: 1px solid #EF4444;
+}
+
+.btn-eliminar:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+    .rejilla-semana {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .rejilla-semana {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}

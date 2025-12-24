@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semana | ONE</title>
+    <!-- Estilos refactorizados -->
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/semana.css">
+    <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
+    <!-- Iconos -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+
+<body>
+    <div class="layout-app">
+        <header class="encabezado-app">
+            <div class="logo-app"><img src="../assets/img/ONE.ico" alt="Logo ONE"> ONE</div>
+            <nav class="menu-superior">
+                <a href="semana.html" class="enlace-superior enlace-activa" title="Semana">
+                    <i data-lucide="calendar"></i>
+                </a>
+                <a href="proyectos.html" class="enlace-superior" title="Proyectos">
+                    <i data-lucide="layout-grid"></i>
+                </a>
+                <a href="habitos.html" class="enlace-superior" title="Hábitos">
+                    <i data-lucide="check-circle"></i>
+                </a>
+                <a href="productividad.html" class="enlace-superior" title="Resumen">
+                    <i data-lucide="bar-chart-3"></i>
+                </a>
+            </nav>
+            <!-- Selector de Espacios en Header -->
+            <div class="selector-espacios">
+                <button class="boton-espacio activo-espacio" data-espacio="Personal">
+                    <i data-lucide="user" style="width:16px; height:16px;"></i> Personal
+                </button>
+                <button class="boton-espacio" data-espacio="Escuela">
+                    <i data-lucide="graduation-cap" style="width:16px; height:16px;"></i> Escuela
+                </button>
+                <button class="boton-espacio" data-espacio="Trabajo">
+                    <i data-lucide="briefcase" style="width:16px; height:16px;"></i> Trabajo
+                </button>
+            </div>
+            <div class="usuario-superior">
+                <a href="perfil.html" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                    <span class="inicial-usuario">L</span>
+                    <span class="nombre-usuario">Luis Ernesto</span>
+                </a>
+            </div>
+        </header>
+
+        <div class="cuerpo-app">
+            <aside class="menu-lateral">
+                <h2 class="titulo-menu">Vistas</h2>
+                <a href="semana.html" class="opcion-menu activo-menu"><i data-lucide="calendar"></i> Semana</a>
+                <a href="proyectos.html" class="opcion-menu"><i data-lucide="layout-grid"></i> Proyectos</a>
+                <a href="habitos.html" class="opcion-menu"><i data-lucide="check-circle"></i> Hábitos</a>
+                <a href="productividad.html" class="opcion-menu"><i data-lucide="bar-chart-3"></i> Resumen</a>
+
+                <h2 class="titulo-menu">Herramientas</h2>
+                <a href="focus.html" class="opcion-menu"><i data-lucide="timer"></i> Focus Mode</a>
+                <a href="capacidad.html" class="opcion-menu"><i data-lucide="gauge"></i> Capacidad</a>
+            </aside>
+
+            <main class="zona-contenido vista-semana">
+                <section class="cabecera-vista">
+                    <div>
+                        <h1>Semana 3 · Noviembre</h1>
+                        <p>Clases, proyectos y bloques de estudio organizados por día.</p>
+                    </div>
+                    <div class="controles-vista">
+                        <button id="btn-prev-semana" class="boton-secundario">◀ Semana anterior</button>
+                        <button id="btn-next-semana" class="boton-secundario">Semana siguiente ▶</button>
+                        <button class="boton-primario" onclick="hoy()">Hoy</button>
+                    </div>
+                </section>
+
+                <section class="rejilla-semana">
+                    <!-- Contenido dinámico renderizado por semana.js -->
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/semana.js"></script>
+    <script src="../assets/js/app.js"></script>
+</body>
+
+</html>

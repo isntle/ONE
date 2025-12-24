@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones | ONE</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .lista-notificaciones {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notificacion-item {
+            background-color: var(--color-fondo-tarjeta);
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--color-acento);
+        }
+
+        .titulo-notif {
+            color: var(--color-texto-blanco);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .tiempo-notif {
+            color: var(--color-texto-tenue);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout-app">
+        <header class="encabezado-app">
+            <div class="logo-app"><img src="../assets/img/ONE.ico" alt="Logo ONE"> ONE</div>
+            <nav class="menu-superior">
+                <a href="semana.html" class="enlace-superior">Volver</a>
+            </nav>
+        </header>
+
+        <main class="zona-contenido">
+            <h1 class="titulo-principal">Tus Avisos</h1>
+
+            <div class="lista-notificaciones" style="margin-top: 20px;">
+                <article class="notificacion-item">
+                    <div class="titulo-notif">Recuerda: Examen de Probabilidad mañana</div>
+                    <div class="tiempo-notif">Hace 2 horas</div>
+                </article>
+                <article class="notificacion-item" style="border-color: #B69AD2;">
+                    <div class="titulo-notif">Hábito completado: Gimnasio</div>
+                    <div class="tiempo-notif">Ayer</div>
+                </article>
+            </div>
+        </main>
+    </div>
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/app.js"></script>
+</body>
+
+</html>

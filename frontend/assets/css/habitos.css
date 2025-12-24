@@ -1,0 +1,205 @@
+/* 
+ * habitos.css
+ * Estilos específicos para la vista de Hábitos
+ */
+
+.vista-habitos {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* RESUMEN SUPERIOR */
+.bloques-resumen-habitos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.bloques-resumen-habitos article {
+    flex: 1 1 200px;
+    min-width: 200px;
+    background-color: var(--color-fondo-tarjeta);
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+}
+
+.bloques-resumen-habitos h3 {
+    font-size: 0.9rem;
+    color: var(--color-texto-secundario);
+    margin-bottom: 6px;
+}
+
+.dato-habito {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-texto-blanco);
+    margin-bottom: 4px;
+}
+
+.nota-habito {
+    font-size: 0.9rem;
+    color: #8F90A0;
+}
+
+/* TABLA DE HÁBITOS */
+.cuadro-habitos {
+    background-color: var(--color-fondo-tarjeta);
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.cuadro-habitos>header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-borde);
+    padding-bottom: 6px;
+    font-size: 0.9rem;
+    color: #C7C8D5;
+}
+
+.encabezado-dias {
+    display: flex;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: var(--color-texto-secundario);
+}
+
+.fila-habito {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #1A1C25;
+    gap: 12px;
+}
+
+.fila-habito:last-child {
+    border-bottom: none;
+}
+
+.nombre-habito {
+    font-size: 0.9rem;
+    color: var(--color-texto-blanco);
+}
+
+/* Tabla GitHub Style */
+.marcas-habito {
+    display: flex;
+    gap: 6px;
+}
+
+.marca-contenedor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.marca-dia-label {
+    font-size: 0.7rem;
+    color: var(--color-texto-tenue);
+    text-transform: uppercase;
+}
+
+.marca {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    /* Cuadradito redondeado estilo GH */
+    border: 1px solid #2A2B35;
+    background-color: #161B22;
+    /* GH Dark dim */
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.marca:hover {
+    border-color: var(--color-texto-tenue);
+}
+
+.marca.llena {
+    background-color: var(--color-acento);
+    border-color: var(--color-acento);
+}
+
+.marca.llena:hover {
+    background-color: var(--color-acento-hover);
+}
+
+/* Indicador de Nota */
+.marca.con-nota::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
+/* Modal Contexto */
+.modal-contexto-habito {
+    background: var(--color-fondo-panel);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--color-borde);
+    width: 300px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-contexto-header {
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--color-texto-blanco);
+    font-size: 0.95rem;
+}
+
+.input-contexto {
+    width: 100%;
+    background: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto-principal);
+    padding: 8px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.btn-guardar-contexto {
+    width: 100%;
+    background: var(--color-acento);
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}

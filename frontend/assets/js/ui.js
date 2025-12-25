@@ -18,7 +18,7 @@ const UI = {
         }
     },
 
-    toast: (mensaje, tipo = 'info') => { // success, error, info
+    toast: (mensaje, tipo = 'info') => {
         UI.initToasts();
 
         const toast = document.createElement('div');

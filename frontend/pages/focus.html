@@ -83,7 +83,11 @@
 
                 <!-- Vista Activa (Timer + Audio) -->
                 <section id="sesion-activa" class="panel-sesion" style="display:none;">
-                    <div class="tarea-actual-display">
+                    <div class="tarea-actual-display" style="position: relative; width: 100%;">
+                        <div id="weather-widget"
+                            style="position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 8px; color: var(--color-texto-tenue); font-size: 0.9rem;">
+                            <!-- Clima se carga aquí -->
+                        </div>
                         <span class="etiqueta-enfocada">ENFOCADO EN</span>
                         <h1 id="titulo-tarea-activa">Sin Tarea</h1>
                     </div>

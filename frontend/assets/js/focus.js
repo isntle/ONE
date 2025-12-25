@@ -98,7 +98,62 @@ window.iniciarFocus = () => {
     const btn = document.getElementById('btn-pausa');
     btn.innerHTML = '<i data-app-icon="pause"></i>';
     Icons.init();
+
+    // Cargar Clima
+    cargarClima();
 };
+
+async function cargarClima() {
+    const el = document.getElementById('weather-widget');
+    if (!el) return;
+
+    el.innerHTML = '<span class="loading-dots">...</span>';
+
+    if (!navigator.geolocation) {
+        el.style.display = 'none';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        try {
+            const { latitude, longitude } = pos.coords;
+            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+            const data = await res.json();
+            const weather = data.current_weather; // { temperature, weathercode }
+
+            // Mapeo WMO code a iconos
+            let icon = 'sun';
+            const w = weather.weathercode;
+            if (w >= 1 && w <= 3) icon = 'cloud-sun'; // Nublado parcial
+            if (w >= 45 && w <= 48) icon = 'cloud'; // Niebla
+            if (w >= 51 && w <= 67) icon = 'cloud-rain'; // Llovizna/Lluvia
+            if (w >= 71 && w <= 77) icon = 'snowflake'; // Nieve
+            if (w >= 80 && w <= 82) icon = 'cloud-rain'; // Chubascos
+            if (w >= 95) icon = 'cloud-lightning'; // Tormenta
+
+            // Usar iconos de Lucide (data-lucide) o App (data-app-icon)? 
+            // Usemos lucide directos para simplificar este widget específico o integrarlo con Icons.js
+            // UI.js usa SVGs inline, Icons.js usa .svg files. Usemos Lucide JS global si está disponible, o inyectar SVG simple.
+            // Dado que Icons.js corre globalmente, usemos un icon name compatible.
+
+            // Map to App Icons names if possible, else standard Lucide names
+            // 'sun' -> no está en icons.js default list? 'cloud-rain' sí.
+            // Vamos a usar lucide.createIcons() después de inyectar.
+
+            el.innerHTML = `
+                <i data-lucide="${icon}" style="width:18px; height:18px;"></i>
+                <span>${weather.temperature}°C</span>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } catch (e) {
+            console.error(e);
+            el.style.display = 'none';
+        }
+    }, (err) => {
+        console.warn("Geoloc denegada", err);
+        el.style.display = 'none';
+    });
+}
 
 function tick() {
     if (!enPausa && tiempoRestante > 0) {

@@ -42,6 +42,37 @@ function cargarDashboard() {
 
     // 6. Inicializar iconos
     if (typeof Icons !== 'undefined') Icons.init();
+
+    // 7. Cargar API Externa (Frase)
+    cargarFraseMotivadora();
+}
+
+async function cargarFraseMotivadora() {
+    const quoteContent = document.getElementById('quote-content');
+    const quoteAuthor = document.getElementById('quote-author');
+    if (!quoteContent) return;
+
+    try {
+        // API: Quotable (Free, Open Source)
+        const response = await fetch('https://api.quotable.io/random?tags=productivity|wisdom|inspirational');
+
+        if (!response.ok) throw new Error('API Error');
+
+        const data = await response.json();
+        quoteContent.textContent = `"${data.content}"`;
+        quoteAuthor.textContent = `— ${data.author}`;
+    } catch (error) {
+        console.warn('API Quote Fallback:', error);
+        // Fallback local si falla la API
+        const frases = [
+            { t: "La mejor forma de predecir el futuro es creándolo.", a: "Abraham Lincoln" },
+            { t: "La productividad nunca es un accidente. Siempre es el resultado de un compromiso con la excelencia.", a: "Paul J. Meyer" },
+            { t: "Enfócate en ser productivo en lugar de estar ocupado.", a: "Tim Ferriss" }
+        ];
+        const random = frases[Math.floor(Math.random() * frases.length)];
+        quoteContent.textContent = `"${random.t}"`;
+        quoteAuthor.textContent = `— ${random.a}`;
+    }
 }
 
 function calcularStats(tareas) {

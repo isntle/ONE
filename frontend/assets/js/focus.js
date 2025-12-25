@@ -74,7 +74,7 @@ function configurarBotonesModo() {
 window.iniciarFocus = () => {
     const tareaId = document.getElementById('select-tarea-focus').value;
     if (!tareaId) {
-        alert("Por favor selecciona en qué vas a trabajar.");
+        UI.toast("Por favor selecciona en qué vas a trabajar.", "info");
         return;
     }
 
@@ -96,7 +96,7 @@ window.iniciarFocus = () => {
 
     // Cambiar icono pausa/play
     const btn = document.getElementById('btn-pausa');
-    btn.innerHTML = '<i data-lucide="pause"></i>';
+    btn.innerHTML = '<i data-app-icon="pause"></i>';
     Icons.init();
 };
 
@@ -126,25 +126,51 @@ window.pausarReanudar = () => {
     enPausa = !enPausa;
     const btn = document.getElementById('btn-pausa');
     if (enPausa) {
-        btn.innerHTML = '<i data-lucide="play"></i>';
+        btn.innerHTML = '<i data-app-icon="play"></i>';
     } else {
-        btn.innerHTML = '<i data-lucide="pause"></i>';
+        btn.innerHTML = '<i data-app-icon="pause"></i>';
     }
     Icons.init();
 };
 
-window.detenerSesion = () => {
-    // Custom Modal como pidió el usuario
-    if (confirm("¿Abandonar sesión? Perderás tu racha actual.")) {
+window.detenerSesion = async () => {
+    const confirmacion = await UI.confirm({
+        titulo: 'Detener sesión',
+        mensaje: '¿Detener la sesión de enfoque? Se guardará el tiempo transcurrido.',
+        textoConfirmar: 'Detener',
+        textoCancelar: 'Continuar'
+    });
+
+    if (confirmacion) {
+        registrarTiempoParcial();
         finalizar();
     }
 };
 
-function completarSesion() {
-    // Sonido final?
-    alert("¡Sesión Completada!"); // Placeholder para modal bonito
+async function completarSesion() {
+    // Registrar tiempo real (el total de la sesión)
+    // Convertir segundos a minutos
+    const minutos = Math.round(tiempoTotal / 60);
+    Store.registrarTiempoFocus(minutos);
+
+    // Sonido final? (Opcional)
     finalizar();
-    // Aquí iría la lógica de gamification (sumar racha)
+
+    // Modal de celebración
+    await UI.alert({
+        titulo: '¡Sesión Completada!',
+        mensaje: `Has sumado <b>${minutos} minutos</b> de foco productivo.`
+    });
+}
+
+// Helper para registrar tiempo parcial al detener
+function registrarTiempoParcial() {
+    const tiempoTranscurrido = tiempoTotal - tiempoRestante;
+    if (tiempoTranscurrido > 60) { // Solo si pasó más de 1 minuto
+        const minutos = Math.round(tiempoTranscurrido / 60);
+        Store.registrarTiempoFocus(minutos);
+        UI.toast(`Sesión detenida. Se sumaron ${minutos}m.`, 'info');
+    }
 }
 
 function finalizar() {
@@ -182,11 +208,20 @@ function detenerAudios() {
 }
 
 // Exit Intent Link Override (Header)
-window.confirmarSalida = (e) => {
+window.confirmarSalida = async (e) => {
     if (document.getElementById('sesion-activa').style.display === 'flex') {
         e.preventDefault();
-        if (confirm("¿Salir del modo Focus? Se detendrá el temporizador.")) {
-            window.location.href = e.currentTarget.href;
+        const urlDestino = e.currentTarget.href;
+
+        const confirmacion = await UI.confirm({
+            titulo: '¿Abandonar sesión?',
+            mensaje: 'Si sales ahora, se detendrá el temporizador.',
+            textoConfirmar: 'Salir',
+            textoCancelar: 'Quedarse'
+        });
+
+        if (confirmacion) {
+            window.location.href = urlDestino;
         }
     }
 };

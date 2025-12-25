@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalle de Proyecto | ONE</title>
     <link rel="stylesheet" href="../assets/css/base.css">
-    <link rel="stylesheet" href="../assets/css/detalle-proyecto.css">
+    <link rel="stylesheet" href="../assets/css/detalle-proyecto.css?v=8">
+    <link rel="stylesheet" href="../assets/css/proyectos.css?v=8">
     <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
     <!-- Iconos -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../assets/js/icons.js"></script>
 </head>
@@ -68,8 +68,12 @@
                     <div class="info-principal">
                         <div class="indicador-proyecto" id="proyecto-color"></div>
                         <h1 id="proyecto-titulo">Cargando proyecto...</h1>
+                        <button class="btn-editar-proyecto" onclick="abrirEdicionProyecto()" title="Editar proyecto">
+                            <i data-lucide="edit-2"></i>
+                        </button>
                     </div>
                     <p class="meta-info">Fecha objetivo: <span id="proyecto-fecha">-- de -- de ----</span></p>
+                    <p class="meta-descripcion" id="proyecto-descripcion">Sin descripción</p>
 
                     <div class="progreso-container">
                         <div class="progreso-labels">
@@ -91,11 +95,10 @@
                     <div class="header-seccion">
                         <h2>Tareas del Proyecto</h2>
                         <button class="boton-primario" id="btn-añadir-tarea">
-                            <i data-lucide="plus"></i> Añadir Tarea
+                            Añadir Tarea
                         </button>
                     </div>
                     <div class="lista-tareas-proyecto" id="lista-tareas">
-                        <!-- Dinámico -->
                     </div>
                 </section>
 
@@ -122,10 +125,15 @@
         </div>
     </div>
 
+    <div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+
     <script src="../assets/js/db.js"></script>
     <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/ui.js"></script>
     <script src="../assets/js/detalle-proyecto.js"></script>
     <script src="../assets/js/app.js"></script>
+</body>
+<script src="../assets/js/app.js"></script>
 </body>
 
 </html>

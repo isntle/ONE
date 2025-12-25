@@ -415,8 +415,15 @@ window.guardarEdicion = (tareaId) => {
     renderizarVista();
 };
 
-window.eliminarTareaModal = (tareaId) => {
-    if (confirm('¿Eliminar tarea?')) {
+window.eliminarTareaModal = async (tareaId) => {
+    const confirmado = await UI.confirm({
+        titulo: 'Eliminar Tarea',
+        mensaje: '¿Estás seguro que deseas eliminar esta tarea?',
+        textoConfirmar: 'Eliminar',
+        textoCancelar: 'Cancelar'
+    });
+
+    if (confirmado) {
         Store.eliminarTarea(tareaId);
         cerrarModal();
         renderizarVista();

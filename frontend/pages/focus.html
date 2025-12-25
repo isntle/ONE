@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modo Focus | ONE</title>
     <link rel="stylesheet" href="../assets/css/base.css">
-    <link rel="stylesheet" href="../assets/css/focus.css">
+    <link rel="stylesheet" href="../assets/css/focus.css?v=4">
     <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/lucide@latest"></script><script src="../assets/js/icons.js"></script>
+    <script src="../assets/js/icons.js"></script>
 </head>
 
 <body>
@@ -98,10 +98,12 @@
                     </div>
 
                     <div class="controles-sesion">
-                        <button class="btn-control" onclick="pausarReanudar()" id="btn-pausa"><i
-                                data-lucide="pause"></i></button>
-                        <button class="btn-control btn-terminar" onclick="detenerSesion()"><i
-                                data-app-icon="square"></i></button>
+                        <button class="btn-control" onclick="pausarReanudar()" id="btn-pausa" title="Pausar/Reanudar">
+                            <i data-app-icon="pause"></i>
+                        </button>
+                        <button class="btn-control btn-terminar" onclick="detenerSesion()" title="Detener sesión">
+                            <i data-app-icon="square"></i>
+                        </button>
                     </div>
 
                     <div class="mixer-audio">
@@ -127,6 +129,7 @@
 
     <script src="../assets/js/db.js"></script>
     <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/ui.js"></script>
     <script src="../assets/js/focus.js"></script>
     <script src="../assets/js/app.js"></script>
 </body>

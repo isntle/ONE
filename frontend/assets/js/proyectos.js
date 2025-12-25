@@ -54,7 +54,7 @@ function renderizarProyectos() {
                 </div>
             </div>
         `;
-        if (typeof lucide !== 'undefined') Icons.init();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
 
@@ -74,7 +74,12 @@ function renderizarProyectos() {
         const tagsHtml = tags.length > 0 ? tags.map(t => `<span class="etiqueta-proyecto">${t}</span>`).join('') : '';
 
         article.innerHTML = `
-            <div class="titulo-proyecto">${p.titulo || 'Sin título'}</div>
+            <div class="proyecto-header-wrapper">
+                <div class="titulo-proyecto">${p.titulo || 'Sin título'}</div>
+                <button class="btn-eliminar-proyecto" onclick="event.stopPropagation(); confirmarEliminarProyecto(${p.id})" title="Eliminar proyecto">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                </button>
+            </div>
             <div class="detalle-proyecto">${p.descripcion || 'Sin descripción'}</div>
             <div class="etiquetas-container">
                 ${tagsHtml}
@@ -119,6 +124,12 @@ window.abrirModalCreacion = (proyectoEditar = null) => {
     const valDesc = (proyectoEditar && proyectoEditar.descripcion) ? proyectoEditar.descripcion : '';
     const valTags = (proyectoEditar && proyectoEditar.etiquetas) ? proyectoEditar.etiquetas : '';
     const idProyecto = (proyectoEditar && proyectoEditar.id) ? proyectoEditar.id : '';
+    // Color por defecto o el del proyecto
+    let colorSeleccionado = (proyectoEditar && proyectoEditar.color) ? proyectoEditar.color : '#8B5CF6';
+    // Fecha objetivo (formato ISO para input type="date")
+    const valFecha = (proyectoEditar && proyectoEditar.objetivo) ? proyectoEditar.objetivo : '';
+
+    const colores = ['#8B5CF6', '#1469FF', '#429155', '#FFBE3D', '#EF4444', '#EC4899'];
 
     overlay.innerHTML = `
         <div class="modal-proyecto">
@@ -135,6 +146,24 @@ window.abrirModalCreacion = (proyectoEditar = null) => {
             <div class="modal-campo">
                 <label>Descripción corta</label>
                 <textarea id="input-desc" placeholder="Objetivo principal...">${valDesc}</textarea>
+            </div>
+
+            <div class="modal-campo">
+                <label>Color</label>
+                <div class="color-picker" id="color-picker-container">
+                    ${colores.map(c => `
+                        <div class="color-option ${c === colorSeleccionado ? 'seleccionado' : ''}" 
+                             style="background-color: ${c}" 
+                             onclick="seleccionarColor(this, '${c}')">
+                        </div>
+                    `).join('')}
+                </div>
+                <input type="hidden" id="input-color" value="${colorSeleccionado}">
+            </div>
+
+            <div class="modal-campo">
+                <label>Fecha objetivo</label>
+                <input type="date" id="input-fecha" value="${valFecha}">
             </div>
             
             <div class="modal-campo">
@@ -154,13 +183,21 @@ window.abrirModalCreacion = (proyectoEditar = null) => {
     setTimeout(() => document.getElementById('input-titulo').focus(), 100);
 }
 
+window.seleccionarColor = (elemento, color) => {
+    document.getElementById('input-color').value = color;
+    document.querySelectorAll('.color-option').forEach(el => el.classList.remove('seleccionado'));
+    elemento.classList.add('seleccionado');
+};
+
 window.guardarProyecto = (idExistente) => {
     const titulo = document.getElementById('input-titulo').value.trim();
     const desc = document.getElementById('input-desc').value.trim();
     const tags = document.getElementById('input-tags').value.trim();
+    const color = document.getElementById('input-color').value;
+    const fecha = document.getElementById('input-fecha').value;
 
     if (!titulo) {
-        alert('Escribe un nombre para el proyecto');
+        UI.toast('Escribe un nombre para el proyecto', 'error');
         return;
     }
 
@@ -173,6 +210,8 @@ window.guardarProyecto = (idExistente) => {
         if (index !== -1) {
             proyectos[index].titulo = titulo;
             proyectos[index].descripcion = desc;
+            proyectos[index].color = color;
+            proyectos[index].objetivo = fecha;
             proyectos[index].etiquetas = tags;
             Store.guardarEstado();
         }
@@ -183,7 +222,8 @@ window.guardarProyecto = (idExistente) => {
             titulo: titulo,
             descripcion: desc,
             etiquetas: tags,
-            color: '#8B5CF6',
+            color: color || '#8B5CF6',
+            objetivo: fecha,
             progreso: 0
         });
     }
@@ -192,14 +232,28 @@ window.guardarProyecto = (idExistente) => {
     renderizarProyectos();
 }
 
-window.borrarProyecto = (id) => {
-    if (confirm('¿Eliminar proyecto?')) {
+window.borrarProyecto = async (id) => {
+    // Buscar nombre si es posible
+    const p = Store.state.proyectos.find(x => x.id == id);
+    const titulo = p ? p.titulo : 'el proyecto';
+
+    const confirmado = await UI.confirm({
+        titulo: 'Eliminar Proyecto',
+        mensaje: `¿Eliminar "${titulo}"? Esta acción no se puede deshacer.`,
+        textoConfirmar: 'Eliminar',
+        textoCancelar: 'Conservar'
+    });
+
+    if (confirmado) {
         Store.state.proyectos = Store.state.proyectos.filter(p => p.id != id);
         Store.guardarEstado();
-        cerrarModal();
+        cerrarModal(); // Si se llamó desde el modal
         renderizarProyectos();
     }
 }
+
+// Alias para el botón de la tarjeta
+window.confirmarEliminarProyecto = window.borrarProyecto;
 
 window.cerrarModal = () => {
     const overlay = document.getElementById('modal-proyecto');

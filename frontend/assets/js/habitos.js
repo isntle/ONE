@@ -8,41 +8,17 @@ let fechaFocoHabitos = new Date();
 
 document.addEventListener('DOMContentLoaded', () => {
     renderizarHabitos();
-    configurarNavegacionSemana();
 });
 
-function configurarNavegacionSemana() {
-    const cabecera = document.querySelector('.titulo-y-nav-habitos');
-    if (!cabecera) return;
+window.cambiarSemana = (dias) => {
+    fechaFocoHabitos.setDate(fechaFocoHabitos.getDate() + dias);
+    renderizarHabitos();
+};
 
-    const existeNav = document.querySelector('.navegacion-semana-habitos');
-    if (existeNav) return;
-
-    const navDiv = document.createElement('div');
-    navDiv.className = 'navegacion-semana-habitos';
-    navDiv.innerHTML = `
-        <button class="btn-nav-mini" id="btn-prev-semana-habitos">◀</button>
-        <button class="btn-nav-mini" id="btn-hoy-habitos">Hoy</button>
-        <button class="btn-nav-mini" id="btn-next-semana-habitos">▶</button>
-    `;
-
-    cabecera.appendChild(navDiv);
-
-    document.getElementById('btn-prev-semana-habitos').addEventListener('click', () => {
-        fechaFocoHabitos.setDate(fechaFocoHabitos.getDate() - 7);
-        renderizarHabitos();
-    });
-
-    document.getElementById('btn-next-semana-habitos').addEventListener('click', () => {
-        fechaFocoHabitos.setDate(fechaFocoHabitos.getDate() + 7);
-        renderizarHabitos();
-    });
-
-    document.getElementById('btn-hoy-habitos').addEventListener('click', () => {
-        fechaFocoHabitos = new Date();
-        renderizarHabitos();
-    });
-}
+window.irHoy = () => {
+    fechaFocoHabitos = new Date();
+    renderizarHabitos();
+};
 
 function inicioDeSemanaLunes(fecha) {
     const d = new Date(fecha);
@@ -73,6 +49,21 @@ function renderizarHabitos() {
             esHoy: esHoy
         });
     }
+
+    // 1. Navegación (FUERA del cuadro, arriba de los días)
+    let navSuperior = document.querySelector('.navegacion-superior-habitos');
+    if (!navSuperior) {
+        navSuperior = document.createElement('div');
+        navSuperior.className = 'navegacion-superior-habitos';
+        contenedor.parentNode.insertBefore(navSuperior, contenedor);
+    }
+    navSuperior.innerHTML = `
+        <div class="nav-grid-wrapper">
+            <button class="btn-nav-grid" onclick="cambiarSemana(-7)">◀</button>
+            <button class="btn-nav-grid" onclick="irHoy()">Hoy</button>
+            <button class="btn-nav-grid" onclick="cambiarSemana(7)">▶</button>
+        </div>
+    `;
 
     let contenedorFilas = contenedor.querySelector('.contenedor-filas');
     if (!contenedorFilas) {
@@ -124,8 +115,13 @@ function renderizarHabitos() {
         fila.className = 'fila-habito';
 
         const divNombre = document.createElement('div');
-        divNombre.className = 'nombre-habito';
-        divNombre.textContent = habito.nombre;
+        divNombre.className = 'nombre-habito-container';
+        divNombre.innerHTML = `
+            <span class="nombre-texto">${habito.nombre}</span>
+            <button class="btn-eliminar-habito" onclick="confirmarEliminarHabito(${habito.id})" title="Eliminar hábito">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+            </button>
+        `;
         fila.appendChild(divNombre);
 
         const divMarcas = document.createElement('div');
@@ -156,7 +152,26 @@ function renderizarHabitos() {
     });
 }
 
+window.confirmarEliminarHabito = async (id) => {
+    const listado = Store.obtenerHabitos();
+    const habito = listado.find(h => h.id === id);
+    const nombre = habito ? habito.nombre : 'este hábito';
+
+    const confirmado = await UI.confirm({
+        titulo: 'Eliminar Hábito',
+        mensaje: `¿Estás seguro de que quieres eliminar "${nombre}" y todo su historial?`,
+        textoConfirmar: 'Eliminar',
+        textoCancelar: 'Cancelar'
+    });
+
+    if (confirmado) {
+        Store.eliminarHabito(id);
+        renderizarHabitos();
+    }
+};
+
 // Botón "Nuevo hábito" inline se maneja vía onclick en el icono "+"
+
 
 function activarInputNuevoHabito() {
     const contenedorFilas = document.querySelector('.contenedor-filas');

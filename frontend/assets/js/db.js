@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'ONE_DB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 let db = null;
 
 // Inicializar IndexedDB
@@ -30,6 +30,11 @@ const DBManager = {
                     tareasStore.createIndex('fecha', 'fecha', { unique: false });
                     tareasStore.createIndex('espacio', 'espacio', { unique: false });
                     tareasStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+                }
+
+                if (!db.objectStoreNames.contains('users')) {
+                    const usersStore = db.createObjectStore('users', { keyPath: 'id' });
+                    usersStore.createIndex('email', 'email', { unique: true });
                 }
 
                 if (!db.objectStoreNames.contains('proyectos')) {

@@ -34,10 +34,16 @@ const Store = {
             const parsed = JSON.parse(data);
             Store.state.tareas = parsed.tareas || [];
             Store.state.proyectos = parsed.proyectos || [];
-            Store.state.habitos = parsed.habitos || [];
-            // Si ya existía un espacio seleccionado, podríamos guardarlo, por ahora default Personal
+
+            // Limpieza de hábitos corruptos ([object Object])
+            let habitosCrudos = parsed.habitos || [];
+            Store.state.habitos = habitosCrudos.map(h => {
+                if (typeof h.nombre === 'object' && h.nombre !== null) {
+                    h.nombre = h.nombre.nombre || "Nuevo Hábito";
+                }
+                return h;
+            });
         } else {
-            // Datos iniciales (Seed)
             Store.seedData();
         }
     },
@@ -55,8 +61,18 @@ const Store = {
     obtenerUsuario: () => Store.state.usuario,
 
     guardarUsuario: (user) => {
+        // Asegurar que tenga campo minutosFocus
+        if (!user.minutosFocus) user.minutosFocus = 0;
         Store.state.usuario = user;
         localStorage.setItem(Store.KEYS.USUARIO, JSON.stringify(user));
+    },
+
+    registrarTiempoFocus: (minutos) => {
+        if (!Store.state.usuario) return; // Si no hay usuario, no guardamos (o guardamos en temporal?)
+        if (!Store.state.usuario.minutosFocus) Store.state.usuario.minutosFocus = 0;
+        Store.state.usuario.minutosFocus += minutos;
+        Store.guardarUsuario(Store.state.usuario);
+        console.log(`⏱️ Tiempo focus registrado: +${minutos}m. Total: ${Store.state.usuario.minutosFocus}m`);
     },
 
     cerrarSesion: () => {
@@ -119,6 +135,11 @@ const Store = {
             ...proyecto
         };
         Store.state.proyectos.push(nuevoProyecto);
+        Store.guardarEstado();
+    },
+
+    eliminarProyecto: (id) => {
+        Store.state.proyectos = Store.state.proyectos.filter(p => String(p.id) !== String(id));
         Store.guardarEstado();
     },
 
@@ -227,12 +248,22 @@ const Store = {
         }
     },
 
-    agregarHabito: (nombre) => {
+    agregarHabito: (data) => {
+        let nombreVal = "Nuevo Hábito";
+        if (typeof data === 'string') nombreVal = data;
+        else if (data && data.nombre) nombreVal = data.nombre;
+
         Store.state.habitos.push({
             id: Date.now(),
-            nombre,
+            nombre: String(nombreVal),
             registros: {}
         });
+        Store.guardarEstado();
+    },
+
+    eliminarHabito: (id) => {
+        // Comparación flexible (número o string)
+        Store.state.habitos = Store.state.habitos.filter(h => String(h.id) !== String(id));
         Store.guardarEstado();
     }
 };

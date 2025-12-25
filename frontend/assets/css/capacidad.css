@@ -157,9 +157,9 @@
 }
 
 .grid-dias-capacidad {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
 }
 
 .dia-cap {

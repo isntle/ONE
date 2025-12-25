@@ -21,8 +21,12 @@ function cargarDatosProyecto(id) {
     currentProject = proyectos.find(p => p.id == id);
 
     if (!currentProject) {
-        alert('Proyecto no encontrado');
-        window.location.href = 'proyectos.html';
+        UI.alert({
+            titulo: 'Error',
+            mensaje: 'Proyecto no encontrado'
+        }).then(() => {
+            window.location.href = 'proyectos.html';
+        });
         return;
     }
 
@@ -30,6 +34,13 @@ function cargarDatosProyecto(id) {
     document.getElementById('proyecto-titulo').textContent = currentProject.titulo;
     document.getElementById('proyecto-color').style.backgroundColor = currentProject.color || '#1469FF';
     document.getElementById('proyecto-fecha').textContent = currentProject.objetivo || 'Sin fecha establecida';
+
+    // Mostrar descripción
+    const descEl = document.getElementById('proyecto-descripcion');
+    if (descEl) {
+        descEl.textContent = currentProject.descripcion || 'Sin descripción';
+        descEl.style.color = currentProject.descripcion ? 'var(--color-texto-secundario)' : 'var(--color-texto-tenue)';
+    }
 
     // Renderizar Progreso
     actualizarProgresoUI();
@@ -47,6 +58,35 @@ function cargarDatosProyecto(id) {
         Store.guardarEstado();
     });
 }
+
+window.abrirEdicionProyecto = () => {
+    // Check if the function already exists (script already loaded)
+    if (typeof window.abrirModalCreacion === 'function') {
+        window.abrirModalCreacion(currentProject);
+        return;
+    }
+
+    // Load proyectos.js script if not already loaded
+    const script = document.createElement('script');
+    script.src = '../assets/js/proyectos.js?v=6';
+    script.onload = () => {
+        // After loading, open modal with current project data
+        if (typeof window.abrirModalCreacion === 'function') {
+            window.abrirModalCreacion(currentProject);
+        }
+
+        // Override the renderizarProyectos to reload the details page after save
+        const originalGuardar = window.guardarProyecto;
+        window.guardarProyecto = function (idExistente) {
+            originalGuardar(idExistente);
+            // Reload the current page to show updated data
+            setTimeout(() => {
+                location.reload();
+            }, 200);
+        };
+    };
+    document.head.appendChild(script);
+};
 
 function inicializarTabs() {
     const btns = document.querySelectorAll('.tab-btn');

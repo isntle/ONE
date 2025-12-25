@@ -43,10 +43,42 @@
     background: var(--color-referencia, var(--color-acento));
 }
 
+.proyecto-header-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 .titulo-proyecto {
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--color-texto-blanco);
+    flex: 1;
+}
+
+.btn-eliminar-proyecto {
+    background: transparent;
+    border: none;
+    color: var(--color-texto-tenue);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0;
+    flex-shrink: 0;
+}
+
+.tarjeta-proyecto:hover .btn-eliminar-proyecto {
+    opacity: 1;
+}
+
+.btn-eliminar-proyecto:hover {
+    color: #FF5555;
+    background: rgba(255, 85, 85, 0.1);
 }
 
 .detalle-proyecto {
@@ -180,4 +212,30 @@
     border: none;
     cursor: pointer;
     font-weight: 600;
+}
+
+/* Color Picker Styles */
+.color-picker {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.color-option {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.15);
+}
+
+.color-option.seleccionado {
+    border-color: white;
+    box-shadow: 0 0 0 2px var(--color-fondo-panel), 0 0 0 4px currentColor;
+    transform: scale(1.1);
 }

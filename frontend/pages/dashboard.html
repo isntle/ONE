@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | ONE</title>
     <link rel="stylesheet" href="../assets/css/base.css">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
+    <link rel="stylesheet" href="../assets/css/dashboard.css?v=2">
     <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/lucide@latest"></script><script src="../assets/js/icons.js"></script>
+    <script src="../assets/js/icons.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -123,8 +123,8 @@
 
                 <!-- Space Distribution -->
                 <div class="dashboard-card">
-                    <h3><i data-lucide="target"></i> Distribución por Espacios</h3>
-                    <div id="space-distribution"></div>
+                    <h3><i data-lucide="pie-chart"></i> Distribución por Espacios</h3>
+                    <div id="space-distribution" style="height: 250px; position: relative;"></div>
                 </div>
 
                 <!-- Today's Tasks Preview -->
@@ -136,37 +136,15 @@
                     <div id="today-tasks-list"></div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="quick-actions-grid">
-                    <div class="action-card" onclick="window.location.href='insights.html'">
-                        <i data-lucide="brain"></i>
-                        <h4>AI Insights</h4>
-                        <p>Análisis inteligente</p>
-                    </div>
-                    <div class="action-card" onclick="window.location.href='focus.html'">
-                        <i data-app-icon="zap"></i>
-                        <h4>Focus Mode</h4>
-                        <p>Sesión de concentración</p>
-                    </div>
-                    <div class="action-card" onclick="window.location.href='capacidad.html'">
-                        <i data-app-icon="gauge"></i>
-                        <h4>Capacidad</h4>
-                        <p>Gestión de energía</p>
-                    </div>
-                    <div class="action-card" onclick="window.location.href='proyectos.html'">
-                        <i data-lucide="folder"></i>
-                        <h4>Proyectos</h4>
-                        <p>Ver todos</p>
-                    </div>
-                </div>
             </main>
         </div>
     </div>
 
-    <script src="../assets/js/db.js"></script>
-    <script src="../assets/js/store.js"></script>
-    <script src="../assets/js/dashboard.js"></script>
-    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/db.js?v=3"></script>
+    <script src="../assets/js/store.js?v=3"></script>
+    <script src="../assets/js/dashboard.js?v=3"></script>
+    <script src="../assets/js/ui.js?v=1"></script>
+    <script src="../assets/js/app.js?v=4"></script>
 </body>
 
 </html>

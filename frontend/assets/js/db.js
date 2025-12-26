@@ -65,12 +65,12 @@ const DBManager = {
     },
 
     // CRUD Operations
-    save: async (storeName, data) => {
+    save: async (storeName, data, fromBackend = false) => {
         if (!db) await DBManager.init();
 
-        // Marcar como pendiente de sincronización
-        data.syncStatus = 'pending';
-        data.lastModified = new Date().toISOString();
+        // Si viene del backend, ya está sincronizado ('synced'). Si es local, 'pending'.
+        data.syncStatus = fromBackend ? 'synced' : 'pending';
+        if (!fromBackend) data.lastModified = new Date().toISOString();
 
         return new Promise((resolve, reject) => {
             const transaction = db.transaction([storeName], 'readwrite');
@@ -78,16 +78,34 @@ const DBManager = {
             const request = store.put(data);
 
             request.onsuccess = () => {
-                // Agregar a outbox para sincronizar con servidor
-                DBManager.addToOutbox({
-                    type: storeName,
-                    action: 'upsert',
-                    data: data
-                });
+                // Solo agregar a outbox si es un cambio LOCAL
+                if (!fromBackend) {
+                    DBManager.addToOutbox({
+                        type: storeName,
+                        action: 'upsert',
+                        data: data
+                    });
+                }
                 resolve(request.result);
             };
             request.onerror = () => reject(request.error);
         });
+    },
+
+    getCookie: (name) => {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     },
 
     getAll: async (storeName) => {
@@ -197,7 +215,8 @@ const DBManager = {
             'tareas': '/tasks/',
             'proyectos': '/projects/',
             'habitos': '/habits/',
-            'habitLogs': '/habit-logs/'
+            'habitLogs': '/habit-logs/',
+            'users': '/users/'
         };
 
         const url = baseUrl + endpoints[operation.type];
@@ -207,7 +226,9 @@ const DBManager = {
             method,
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': DBManager.getCookie('csrftoken') || ''
             },
+            credentials: 'include', // Cookie de sesión
             body: operation.action !== 'delete' ? JSON.stringify(operation.data) : undefined
         });
 
@@ -226,6 +247,79 @@ const DBManager = {
         for (const op of synced) {
             await DBManager.delete('outbox', op.id);
         }
+    },
+
+    // Cargar todo del backend (Restore Backup)
+    loadAllFromBackend: async () => {
+        if (!navigator.onLine) return;
+
+        console.log("⬇️ Descargando datos del servidor...");
+        // Orden importante: Proyectos antes de Tareas (por FK si existiera)
+        const types = ['projects', 'tasks', 'habits'];
+        const localTypes = { 'tasks': 'tareas', 'projects': 'proyectos', 'habits': 'habitos' };
+
+        for (const type of types) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/${type}/`, {
+                    credentials: 'include' // Auth cookie
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const localStore = localTypes[type];
+
+                    // Guardar en IndexedDB y Store en memoria
+                    // Nota: Esto sobrescribe lo local con lo del servidor
+                    // Idealmente sería un merge, pero para restore está bien
+
+                    // Helper simple para Store
+                    if (type === 'tasks') Store.state.tareas = [];
+                    if (type === 'projects') Store.state.proyectos = [];
+                    if (type === 'habits') Store.state.habitos = []; // La lógica de habits es más compleja por logs, simplificado aquí
+
+                    for (const item of data) {
+                        // Transformar keys si es necesario (el Serializer ya las manda "frontend friendly"?)
+                        // Nuestro Serializer envia Keys del Backend (id, title, status) O Keys mapeadas?
+                        // El Serializer de Tasks OUTPUTS: id, titulo, fecha... (gracias a los fields explícitos)
+                        // Verify this assumption!
+
+                        // await DBManager.save(localStore, item);
+                        // FIX: Usar flag fromBackend=true para no rebotar a outbox
+                        await DBManager.save(localStore, item, true);
+                    }
+                }
+            } catch (err) {
+                console.error(`Error cargando ${type}:`, err);
+            }
+        }
+
+        // Recargar en memoria desde IDB (o directo arriba)
+        Store.state.tareas = await DBManager.getAll('tareas');
+        Store.state.proyectos = await DBManager.getAll('proyectos');
+        Store.state.habitos = await DBManager.getAll('habitos');
+        Store.guardarEstado();
+        console.log("✅ Datos restaurados del servidor");
+    },
+    // Limpiar toda la base de datos (Logout)
+    clearAll: async () => {
+        if (!db) await DBManager.init();
+
+        const stores = ['tareas', 'proyectos', 'habitos', 'habitLogs', 'outbox', 'users'];
+        const transaction = db.transaction(stores, 'readwrite');
+
+        stores.forEach(storeName => {
+            if (db.objectStoreNames.contains(storeName)) {
+                transaction.objectStore(storeName).clear();
+            }
+        });
+
+        return new Promise((resolve, reject) => {
+            transaction.oncomplete = () => {
+                console.log("🧹 Base de datos limpia (Logout)");
+                resolve();
+            };
+            transaction.onerror = () => reject(transaction.error);
+        });
     }
 };
 

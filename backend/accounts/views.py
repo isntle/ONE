@@ -1,9 +1,18 @@
-from rest_framework import status, views
+from rest_framework import status, views, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from .serializers import UserSerializer
 from django.contrib.auth import authenticate, login
 from .models import User
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [AllowAny] # Simplificado para demo
+
+    def get_queryset(self):
+        # Opcional: filtrar por usuario actual si fuese prod
+        return User.objects.all()
 
 class RegisterView(views.APIView):
     permission_classes = [AllowAny]
@@ -12,7 +21,6 @@ class RegisterView(views.APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            # Auto-login after register? Or just return success
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -22,10 +30,19 @@ class LoginView(views.APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+        
+        # Intentar autenticar con email si el username falla (opcional, pero útil)
+        if not username and 'email' in request.data:
+            try:
+                user_obj = User.objects.get(email=request.data['email'])
+                username = user_obj.username
+            except User.DoesNotExist:
+                pass
+
         user = authenticate(username=username, password=password)
         
         if user:
-            login(request, user) # Session-based auth for now
+            login(request, user)
             return Response(UserSerializer(user).data)
         return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
 

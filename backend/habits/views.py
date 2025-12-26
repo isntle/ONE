@@ -1,11 +1,18 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from .models import Habit, HabitLog
 from .serializers import HabitSerializer, HabitLogSerializer
 
 class HabitViewSet(viewsets.ModelViewSet):
-    queryset = Habit.objects.all()
     serializer_class = HabitSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Habit.objects.filter(owner=self.request.user)
 
 class HabitLogViewSet(viewsets.ModelViewSet):
-    queryset = HabitLog.objects.all()
     serializer_class = HabitLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Return logs for habits owned by the user
+        return HabitLog.objects.filter(habit__owner=self.request.user)

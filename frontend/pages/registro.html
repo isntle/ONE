@@ -38,7 +38,13 @@
 
                 <div class="grupo-input">
                     <label for="password" class="etiqueta-input">Contraseña</label>
-                    <input type="password" id="password" class="input-auth" placeholder="Min. 8 caracteres" required>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="input-auth" placeholder="Min. 8 caracteres"
+                            required>
+                        <button type="button" class="btn-toggle-password" id="togglePassword">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="boton-primario boton-completo">Crear Cuenta</button>

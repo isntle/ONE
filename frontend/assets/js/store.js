@@ -32,18 +32,34 @@ const Store = {
 
         if (data) {
             const parsed = JSON.parse(data);
-            Store.state.tareas = parsed.tareas || [];
-            Store.state.proyectos = parsed.proyectos || [];
+            // Filtrado por usuario actual (Multi-User Cache support)
+            const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
 
-            // Limpieza de hábitos corruptos ([object Object])
-            let habitosCrudos = parsed.habitos || [];
-            Store.state.habitos = habitosCrudos.map(h => {
-                if (typeof h.nombre === 'object' && h.nombre !== null) {
-                    h.nombre = h.nombre.nombre || "Nuevo Hábito";
-                }
-                return h;
-            });
+            if (currentUserEmail) {
+                Store.state.tareas = (parsed.tareas || []).filter(t => t.owner_email === currentUserEmail);
+                Store.state.proyectos = (parsed.proyectos || []).filter(p => p.owner_email === currentUserEmail);
+
+                let habitosCrudos = parsed.habitos || [];
+                Store.state.habitos = habitosCrudos
+                    .filter(h => h.owner_email === currentUserEmail)
+                    .map(h => {
+                        if (typeof h.nombre === 'object' && h.nombre !== null) {
+                            h.nombre = h.nombre.nombre || "Nuevo Hábito";
+                        }
+                        return h;
+                    });
+            } else {
+                // Fallback si no hay usuario logueado (pantalla login?)
+                Store.state.tareas = [];
+                Store.state.proyectos = [];
+                Store.state.habitos = [];
+            }
         } else {
+            Store.seedData();
+        }
+
+        // Doble check: Si cargó datos pero están vacíos (usuario nuevo sync), intentar seed
+        if (Store.state.tareas.length === 0 && Store.state.proyectos.length === 0) {
             Store.seedData();
         }
     },
@@ -76,8 +92,8 @@ const Store = {
     },
 
     cerrarSesion: () => {
-        localStorage.clear(); // Limpiar todo para demo
-        location.reload();
+        localStorage.clear();  // Limpia usuario activo
+        location.reload();     // Recarga App, Store.cargarDatos filtrará (y no encontrará usuario, so empty)
     },
 
     // --- ESPACIOS ---
@@ -100,16 +116,25 @@ const Store = {
             id: Date.now(),
             espacio: Store.state.espacioActual,
             completada: false,
+            owner_email: Store.state.usuario ? Store.state.usuario.email : null,
             ...tarea
         };
         Store.state.tareas.push(nuevaTarea);
         Store.guardarEstado();
+        // SYNC: Enviar a IndexedDB/Backend
+        if (typeof DBManager !== 'undefined') {
+            DBManager.save('tareas', nuevaTarea);
+        }
         return nuevaTarea;
     },
 
     eliminarTarea: (id) => {
         Store.state.tareas = Store.state.tareas.filter(t => t.id !== id);
         Store.guardarEstado();
+        // SYNC: Registrar borrado
+        if (typeof DBManager !== 'undefined') {
+            DBManager.delete('tareas', id);
+        }
     },
 
     actualizarTarea: (id, cambios) => {
@@ -117,6 +142,10 @@ const Store = {
         if (index !== -1) {
             Store.state.tareas[index] = { ...Store.state.tareas[index], ...cambios };
             Store.guardarEstado();
+            // SYNC: Actualizar en backend
+            if (typeof DBManager !== 'undefined') {
+                DBManager.save('tareas', Store.state.tareas[index]);
+            }
             return Store.state.tareas[index];
         }
         return null;
@@ -132,15 +161,24 @@ const Store = {
             id: Date.now(),
             espacio: Store.state.espacioActual,
             progreso: 0,
+            owner_email: Store.state.usuario ? Store.state.usuario.email : null,
             ...proyecto
         };
         Store.state.proyectos.push(nuevoProyecto);
         Store.guardarEstado();
+        // SYNC
+        if (typeof DBManager !== 'undefined') {
+            DBManager.save('proyectos', nuevoProyecto);
+        }
     },
 
     eliminarProyecto: (id) => {
         Store.state.proyectos = Store.state.proyectos.filter(p => String(p.id) !== String(id));
         Store.guardarEstado();
+        // SYNC
+        if (typeof DBManager !== 'undefined') {
+            DBManager.delete('proyectos', id);
+        }
     },
 
     // --- HÁBITOS (Globales, no por espacio necesariamente, o sí?) ---
@@ -153,65 +191,46 @@ const Store = {
     },
 
     // --- SEED DATA (Datos de prueba dinámicos) ---
+    // --- SEED DATA (Datos de prueba dinámicos) ---
     seedData: () => {
-        console.log("Generando datos de prueba...");
+        // Solo sembrar datos si el usuario es el Demo "juan@gmail.com"
+        const usuario = Store.state.usuario;
+        if (usuario && usuario.email === 'juan@gmail.com') {
+            console.log("🌱 Sembrando datos de ejemplo para Juan Pablo...");
 
-        // Helper para obtener fechas de esta semana
-        const getFechaSemana = (diaIndex) => { // 0=Lunes, 6=Domingo
-            const d = new Date();
-            const day = d.getDay();
-            const diff = d.getDate() - day + (day === 0 ? -6 : 1) + diaIndex;
-            const fecha = new Date(d.setDate(diff));
-            return Store.fechaIsoLocal(fecha);
-        };
+            const hoy = new Date();
+            const hoyIso = Store.fechaIsoLocal(hoy);
 
-        const LUNES = getFechaSemana(0);
-        const MARTES = getFechaSemana(1);
-        const MIERCOLES = getFechaSemana(2);
-        const VIERNES = getFechaSemana(4);
+            // Generar fechas relativas
+            const manana = new Date(hoy); manana.setDate(manana.getDate() + 1);
+            const mananaIso = Store.fechaIsoLocal(manana);
 
-        Store.state.tareas = [
-            // ESCUELA
-            { id: 1, titulo: "Probabilidad", descripcion: "Ejercicios Tarea 2", espacio: "Escuela", fecha: LUNES, horaInicio: "16:00", horaFin: "18:00", tipo: "horario-escuela", completada: false, color: "azul" },
-            { id: 2, titulo: "Redes", descripcion: "Topología Packet Tracer", espacio: "Escuela", fecha: MARTES, horaInicio: "14:00", horaFin: "16:00", tipo: "horario-escuela", completada: false, color: "azul" },
-            { id: 3, titulo: "Métodos Numéricos", descripcion: "Práctica Gauss-Jordan", espacio: "Escuela", fecha: MIERCOLES, horaInicio: "15:00", horaFin: "17:00", tipo: "horario-escuela", completada: false, color: "azul" },
+            const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
+            const ayerIso = Store.fechaIsoLocal(ayer);
 
-            // PERSONAL
-            { id: 4, titulo: "Gimnasio", descripcion: "Rutina tren superior", espacio: "Personal", fecha: LUNES, horaInicio: "19:00", horaFin: "20:00", tipo: "horario-personal", completada: false, color: "rosa" },
-            { id: 5, titulo: "Fútbol", descripcion: "Partido con amigos", espacio: "Personal", fecha: VIERNES, horaInicio: "20:00", horaFin: "22:00", tipo: "horario-personal", completada: false, color: "verde" },
+            Store.state.tareas = [
+                { id: 101, titulo: "Gimnasio", fecha: hoyIso, horaInicio: "19:00", horaFin: "20:30", color: "morado", espacio: "Personal", completada: false },
+                { id: 102, titulo: "Fútbol", fecha: mananaIso, horaInicio: "20:00", horaFin: "22:00", color: "verde", espacio: "Personal", completada: false },
+                { id: 103, titulo: "Estudiar Probabilidad", fecha: hoyIso, horaInicio: "16:00", horaFin: "18:00", color: "azul", espacio: "Escuela", completada: true },
+                { id: 104, titulo: "Entrega de Proyecto", fecha: mananaIso, horaInicio: "09:00", horaFin: "10:00", color: "rojo", espacio: "Trabajo", completada: false },
+                { id: 105, titulo: "Leer 20 mins", fecha: ayerIso, horaInicio: "21:00", horaFin: "21:20", color: "amarillo", espacio: "Personal", completada: true }
+            ];
 
-            // TRABAJO
-            { id: 6, titulo: "Reunión de equipo", descripcion: "Sprint Planning", espacio: "Trabajo", fecha: LUNES, horaInicio: "09:00", horaFin: "10:00", tipo: "horario-trabajo", completada: false, color: "amarillo" },
-            { id: 7, titulo: "Desarrollo Frontend", descripcion: "Componentes React", espacio: "Trabajo", fecha: MIERCOLES, horaInicio: "10:00", horaFin: "13:00", tipo: "horario-trabajo", completada: false, color: "morado" }
-        ];
+            Store.state.proyectos = [
+                { id: 201, titulo: "Tesis de Grado", descripcion: "Investigación final para titulación", progreso: 65, color: "#3B82F6", espacio: "Escuela", etiquetas: "Urgente, Tesis" },
+                { id: 202, titulo: "Portafolio Web", descripcion: "Rediseño de sitio personal", progreso: 30, color: "#8B5CF6", espacio: "Personal", etiquetas: "Diseño, Dev" }
+            ];
 
-        Store.state.proyectos = [
-            { id: 1, titulo: "Minishell en C", descripcion: "Sistemas Operativos", espacio: "Escuela", etiquetas: "C, SysOp", color: "#3B82F6", progreso: 45 },
-            { id: 2, titulo: "Portafolio Web", descripcion: "Rediseño personal", espacio: "Trabajo", etiquetas: "Web, Design", color: "#8B5CF6", progreso: 70 },
-            { id: 3, titulo: "Proyecto Gym", descripcion: "Rutina de entrenamiento", espacio: "Personal", etiquetas: "Salud, Fitness", color: "#EC4899", progreso: 30 }
-        ];
+            Store.state.habitos = [
+                { id: 301, nombre: "Tomar Agua (2L)", registros: { [hoyIso]: { completado: true } } },
+                { id: 302, nombre: "Leer 20 mins", registros: { [ayerIso]: { completado: true } } }
+            ];
 
-        Store.state.habitos = [
-            {
-                id: 1,
-                nombre: "Estudiar inglés",
-                // Registros usando fecha ISO YYYY-MM-DD
-                registros: {
-                    [LUNES]: { completado: true, nota: "Verbos irregulares" },
-                    [MIERCOLES]: { completado: true, nota: "Listening practice" }
-                }
-            },
-            {
-                id: 2,
-                nombre: "Leer 20 mins",
-                registros: {
-                    [MARTES]: { completado: true, nota: "Atomic Habits - Cap 3" },
-                    [VIERNES]: { completado: false, nota: "" } // Opcional guardar los false
-                }
-            }
-        ];
-
-        Store.guardarEstado();
+            Store.guardarEstado();
+        } else {
+            console.log("Iniciando aplicación sin datos (Clean Slate)...");
+            Store.guardarEstado();
+        }
     },
 
     // --- FECHAS ---
@@ -245,6 +264,10 @@ const Store = {
                 };
             }
             Store.guardarEstado();
+            // SYNC: Actualizar habito en backend
+            if (typeof DBManager !== 'undefined') {
+                DBManager.save('habitos', habito);
+            }
         }
     },
 
@@ -253,18 +276,28 @@ const Store = {
         if (typeof data === 'string') nombreVal = data;
         else if (data && data.nombre) nombreVal = data.nombre;
 
-        Store.state.habitos.push({
+        const nuevoHabito = {
             id: Date.now(),
             nombre: String(nombreVal),
-            registros: {}
-        });
+            registros: {},
+            owner_email: Store.state.usuario ? Store.state.usuario.email : null
+        };
+        Store.state.habitos.push(nuevoHabito);
         Store.guardarEstado();
+        // SYNC
+        if (typeof DBManager !== 'undefined') {
+            DBManager.save('habitos', nuevoHabito);
+        }
     },
 
     eliminarHabito: (id) => {
         // Comparación flexible (número o string)
         Store.state.habitos = Store.state.habitos.filter(h => String(h.id) !== String(id));
         Store.guardarEstado();
+        // SYNC
+        if (typeof DBManager !== 'undefined') {
+            DBManager.delete('habitos', id);
+        }
     }
 };
 

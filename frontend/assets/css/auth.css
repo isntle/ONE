@@ -96,6 +96,48 @@
     border-color: var(--color-acento);
 }
 
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-wrapper .input-auth {
+    width: 100%;
+    padding-right: 45px !important;
+    /* Espacio reservado para el icono */
+    box-sizing: border-box;
+    /* Asegurar que el padding no rompa el ancho */
+}
+
+.btn-toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px;
+    cursor: pointer;
+    color: #6B7280;
+    /* Color gris neutro */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.btn-toggle-password:hover {
+    color: var(--color-acento);
+    background: transparent !important;
+}
+
+.btn-toggle-password i,
+.btn-toggle-password svg {
+    width: 20px;
+    height: 20px;
+}
+
 .boton-completo {
     width: 100%;
     padding: 12px;

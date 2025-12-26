@@ -23,14 +23,15 @@ from projects.views import ProjectViewSet
 from tasks.views import TaskViewSet
 from habits.views import HabitViewSet, HabitLogViewSet
 
-from accounts.views import RegisterView, LoginView, StreakView
+from accounts.views import RegisterView, LoginView, StreakView, UserViewSet
 
 router = DefaultRouter()
-router.register(r'spaces', SpaceViewSet)
-router.register(r'projects', ProjectViewSet)
-router.register(r'tasks', TaskViewSet)
-router.register(r'habits', HabitViewSet)
-router.register(r'habit-logs', HabitLogViewSet)
+router.register(r'users', UserViewSet)
+router.register(r'spaces', SpaceViewSet, basename='space')
+router.register(r'projects', ProjectViewSet, basename='project')
+router.register(r'tasks', TaskViewSet, basename='task')
+router.register(r'habits', HabitViewSet, basename='habit')
+router.register(r'habit-logs', HabitLogViewSet, basename='habit-log')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

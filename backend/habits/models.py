@@ -3,7 +3,7 @@ from django.conf import settings
 import uuid
 
 class Habit(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.CharField(max_length=50, primary_key=True, editable=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='habits')
     space = models.ForeignKey('spaces.Space', on_delete=models.CASCADE, related_name='habits', null=True)
     
@@ -21,7 +21,7 @@ class Habit(models.Model):
         return self.name
 
 class HabitLog(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.CharField(max_length=50, primary_key=True, editable=False)
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE, related_name='logs')
     date = models.DateField()
     done = models.BooleanField(default=True)

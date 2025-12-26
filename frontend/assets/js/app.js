@@ -52,16 +52,19 @@ function cargarDatosUsuario() {
     const usuario = Store.obtenerUsuario();
     if (!usuario) return;
 
+    // Nombre seguro (Back envía username, Front guardaba nombre... unificamos)
+    const displayName = usuario.nombre || usuario.first_name || usuario.username || "Usuario";
+
     // Inicial del header
     const iniciales = document.querySelectorAll('.inicial-usuario');
     iniciales.forEach(el => {
-        el.textContent = usuario.nombre.charAt(0).toUpperCase();
+        el.textContent = displayName.charAt(0).toUpperCase();
     });
 
     // Nombre completo del header
     const nombres = document.querySelectorAll('.nombre-usuario');
     nombres.forEach(el => {
-        el.textContent = usuario.nombre;
+        el.textContent = displayName;
     });
 
     // Configurar Logout
@@ -74,12 +77,21 @@ function cargarDatosUsuario() {
         clone.addEventListener('click', async () => {
             const confirmado = await UI.confirm({
                 titulo: 'Cerrar Sesión',
-                mensaje: `¿Estás seguro que quieres cerrar la sesión de ${usuario.nombre}?`,
+                mensaje: `¿Estás seguro que quieres cerrar la sesión de ${displayName}?`,
                 textoConfirmar: 'Sí, Salir',
                 textoCancelar: 'Cancelar'
             });
 
             if (confirmado) {
+                // Sincronización final segura
+                UI.toast("Guardando cambios...", "info");
+                try {
+                    if (typeof DBManager !== 'undefined') {
+                        await DBManager.syncWithBackend();
+                    }
+                } catch (e) {
+                    console.error("Error sync logout:", e);
+                }
                 Store.cerrarSesion();
             }
         });

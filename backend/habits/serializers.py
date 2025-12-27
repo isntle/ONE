@@ -8,7 +8,7 @@ class HabitLogSerializer(serializers.ModelSerializer):
 
 class HabitSerializer(serializers.ModelSerializer):
     id = serializers.CharField(required=False)
-    # Flatten logs for frontend: { '2023-01-01': { completado: true, nota: '' } }
+    # Aplanar registros para el frontend: { '2023-01-01': { completado: true, nota: '' } }
     registros = serializers.SerializerMethodField()
     registros_input = serializers.DictField(write_only=True, required=False)
     nombre = serializers.CharField(source='name', required=False)
@@ -29,11 +29,11 @@ class HabitSerializer(serializers.ModelSerializer):
         return result
 
     def to_internal_value(self, data):
-        # FIX: Ensure ID is a string
+        # ARREGLO: Asegurar que el ID sea texto
         if 'id' in data:
             data['id'] = str(data['id'])
 
-        # FIX: Map 'registros' (frontend) to 'registros_input' (backend write)
+        # ARREGLO: Mapear 'registros' (frontend) a 'registros_input' (backend)
         if 'registros' in data and 'registros_input' not in data:
             data['registros_input'] = data['registros']
         
@@ -45,7 +45,7 @@ class HabitSerializer(serializers.ModelSerializer):
         
         habit = Habit.objects.create(owner=user, **validated_data)
         
-        # Handle logs creation
+        # Manejar la creación de registros
         self._update_logs(habit, registros_data)
         return habit
 

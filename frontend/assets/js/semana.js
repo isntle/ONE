@@ -1,6 +1,6 @@
 /*
  * semana.js
- * Lógica específica para la vista de Semana (Tweek Logic)
+ * Lógica específica para la vista de Semana (Lógica Tweek)
  */
 
 // Estado local de la vista
@@ -30,7 +30,7 @@ function isoLocal(fecha) {
 
 function inicioDeSemanaLunes(fecha) {
     const d = normalizarFechaLocal(fecha);
-    // JS: 0=Dom..6=Sáb -> Lunes=0
+    // JS: 0=Dom..6=Sáb -> Lunes (queremos que 0 sea Lunes para el cálculo)
     const idxLunes = (d.getDay() + 6) % 7;
     d.setDate(d.getDate() - idxLunes);
     return d;

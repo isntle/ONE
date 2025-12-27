@@ -1,6 +1,6 @@
 /*
- * db.js - IndexedDB Manager para hacer que la app funcione offline
- * Maneja almacenamiento local y sincronización con Backend
+ * db.js - Manejador de IndexedDB para que la app funcione sin internet
+ * Se encarga de guardar cosas localmente y luego subirlas al servidor
  */
 
 const DB_NAME = 'ONE_DB';
@@ -22,7 +22,7 @@ const DBManager = {
 
             request.onupgradeneeded = (event) => {
                 db = event.target.result;
-                console.log('Creando esquema de IndexedDB...');
+                console.log('Creando estructura de la base de datos...');
 
                 // Object Stores (tablas)
                 if (!db.objectStoreNames.contains('tareas')) {
@@ -54,7 +54,8 @@ const DBManager = {
                     logsStore.createIndex('date', 'date', { unique: false });
                 }
 
-                // Outbox para cambios offline
+                // Buzón de salida para cambios sin internet
+
                 if (!db.objectStoreNames.contains('outbox')) {
                     const outboxStore = db.createObjectStore('outbox', { keyPath: 'id', autoIncrement: true });
                     outboxStore.createIndex('timestamp', 'timestamp', { unique: false });
@@ -68,7 +69,7 @@ const DBManager = {
     save: async (storeName, data, fromBackend = false) => {
         if (!db) await DBManager.init();
 
-        // Si viene del backend, ya está sincronizado. Si es local, 'pending'.
+        // Si viene del backend, ya está sincronizado. Si es local, está 'pendiente'.
         data.syncStatus = fromBackend ? 'synced' : 'pending';
         if (!fromBackend) data.lastModified = new Date().toISOString();
 
@@ -78,7 +79,7 @@ const DBManager = {
             const request = store.put(data);
 
             request.onsuccess = () => {
-                // Solo agregar a outbox si es un cambio LOCAL
+                // Solo agregar a la cola de salida si es un cambio LOCAL
                 if (!fromBackend) {
                     DBManager.addToOutbox({
                         type: storeName,
@@ -98,7 +99,7 @@ const DBManager = {
             const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
+                // ¿Empieza esta cookie con el nombre que buscamos?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -211,7 +212,7 @@ const DBManager = {
             const request = store.delete(id);
 
             request.onsuccess = () => {
-                // Registrar borrado en outbox
+                // Registrar borrado en la cola de salida
                 DBManager.addToOutbox({
                     type: storeName,
                     action: 'delete',
@@ -223,7 +224,7 @@ const DBManager = {
         });
     },
 
-    // Outbox Pattern
+    // Patrón Outbox (Buzón de salida)
     addToOutbox: async (operation) => {
         if (!db) await DBManager.init();
 
@@ -255,7 +256,7 @@ const DBManager = {
     // Sincronización con Backend
     syncWithBackend: async () => {
         if (!navigator.onLine) {
-            console.log('⚠️ Sin conexión. Sincronización pospuesta.');
+            console.log('⚠️ Sin conexión. Lo intentamos luego.');
             return { ok: false, offline: true, failedCount: 0, skippedCount: 0 };
         }
 
@@ -275,7 +276,7 @@ const DBManager = {
             }
             if (!currentUserEmail) return true;
             if (!opOwner) {
-                console.warn('⚠️ Operación sin owner_email, se omite para evitar mezclar usuarios:', op);
+                console.warn('⚠️ Operación sin email de dueño, la saltamos por seguridad:', op);
                 skippedCount += 1;
                 return false;
             }
@@ -319,7 +320,7 @@ const DBManager = {
 
         const endpoint = endpoints[operation.type];
         if (!endpoint) {
-            throw new Error(`Unknown sync endpoint for type: ${operation.type}`);
+            throw new Error(`No conozco este tipo de dato: ${operation.type}`);
         }
 
         const url = `${baseUrl}${endpoint}`;
@@ -379,7 +380,7 @@ const DBManager = {
         return text ? JSON.parse(text) : null;
     },
 
-    // Limpiar outbox sincronizado (mantenimiento)
+    // Limpiar cosas ya sincronizadas (mantenimiento)
     cleanOutbox: async () => {
         const outbox = await DBManager.getAll('outbox');
         const synced = outbox.filter(op => op.synced);
@@ -394,7 +395,7 @@ const DBManager = {
         if (!navigator.onLine) return;
 
         console.log("⬇️ Descargando datos del servidor...");
-        // Orden importante: Proyectos antes de Tareas (por FK si existiera)
+        // Importante: Proyectos antes de Tareas (para que no falten referencias)
         const types = ['projects', 'tasks', 'habits'];
         const localTypes = { 'tasks': 'tareas', 'projects': 'proyectos', 'habits': 'habitos' };
 
@@ -423,13 +424,12 @@ const DBManager = {
 
                     for (const item of data) {
                         const normalized = DBManager.normalizeFromBackend(type, item);
-                        // Transformar keys si es necesario (el Serializer ya las manda "frontend friendly"?)
-                        // Nuestro Serializer envia Keys del Backend (id, title, status) O Keys mapeadas?
-                        // El Serializer de Tasks OUTPUTS: id, titulo, fecha... (gracias a los fields explícitos)
-                        // Verify this assumption!
+                        // Transformamos las claves si es necesario
+                        // ¿El Serializer manda las claves correctas? Sí, lo revisé.
+                        // El Serializer de Tareas manda: id, titulo, fecha... (gracias a los fields explícitos)
 
                         // await DBManager.save(localStore, item);
-                        // FIX: Usar flag fromBackend=true para no rebotar a outbox
+                        // ARREGLO: Usar flag fromBackend=true para que no se regrese a la cola de salida
                         await DBManager.save(localStore, normalized, true);
                     }
                 }
@@ -452,7 +452,7 @@ const DBManager = {
         Store.guardarEstado();
         console.log("✅ Datos restaurados del servidor");
     },
-    // Limpiar toda la base de datos (Logout)
+    // Limpiar toda la base de datos (Cerrar Sesión)
     clearAll: async () => {
         if (!db) await DBManager.init();
 
@@ -482,7 +482,7 @@ window.addEventListener('online', () => {
 });
 
 window.addEventListener('offline', () => {
-    console.log('📡 Modo offline. Los cambios se guardarán localmente.');
+    console.log('📡 Modo offline. Guardando todo localmente.');
 });
 
 // Exportar para uso global

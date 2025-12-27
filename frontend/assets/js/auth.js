@@ -31,7 +31,8 @@ const Auth = {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
 
-                // Toggle icon
+                // Alternar icono
+
                 const icon = toggleBtn.querySelector('i');
                 if (icon) {
                     if (type === 'text') {
@@ -101,7 +102,8 @@ const Auth = {
                     return;
                 }
 
-                // Fallback local si no hay login remoto
+                // Respaldo local si no hay login remoto
+
                 const usuarios = await DBManager.getByIndex('users', 'email', email);
 
                 if (usuarios && usuarios.length > 0) {

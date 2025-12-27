@@ -9,4 +9,5 @@ class SpaceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
+        # Devolver los espacios del usuario actual
         return Space.objects.filter(owner=self.request.user)

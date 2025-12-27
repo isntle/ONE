@@ -4,7 +4,7 @@ from spaces.models import Space
 
 class ProjectSerializer(serializers.ModelSerializer):
     id = serializers.CharField(required=False)
-    # Frontend keys mapping
+    # Mapeo de claves para el frontend (nombres en español)
     titulo = serializers.CharField(source='title', required=False)
     objetivo = serializers.DateField(source='due_date', required=False, allow_null=True)
     progreso = serializers.IntegerField(source='progress', required=False)
@@ -23,7 +23,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         ]
 
     def to_internal_value(self, data):
-        # FIX: Ensure ID is a string (frontend sends int timestamp)
+        # ARREGLO: Asegurar que el ID sea texto (el frontend envía números)
         if 'id' in data:
             data['id'] = str(data['id'])
         return super().to_internal_value(data)

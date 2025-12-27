@@ -64,26 +64,26 @@ function cargarDatosProyecto(id) {
 }
 
 window.abrirEdicionProyecto = () => {
-    // Check if the function already exists (script already loaded)
+    // Comprobar si la función ya existe (el script ya se cargó)
     if (typeof window.abrirModalCreacion === 'function') {
         window.abrirModalCreacion(currentProject);
         return;
     }
 
-    // Load proyectos.js script if not already loaded
+    // Cargar el script de proyectos si no está cargado
     const script = document.createElement('script');
     script.src = '../assets/js/proyectos.js?v=6';
     script.onload = () => {
-        // After loading, open modal with current project data
+        // Al terminar de cargar, abrir el modal con los datos del proyecto actual
         if (typeof window.abrirModalCreacion === 'function') {
             window.abrirModalCreacion(currentProject);
         }
 
-        // Override the renderizarProyectos to reload the details page after save
+        // Sobreescribir renderizarProyectos para recargar la página de detalles tras guardar
         const originalGuardar = window.guardarProyecto;
         window.guardarProyecto = function (idExistente) {
             originalGuardar(idExistente);
-            // Reload the current page to show updated data
+            // Recargar la página actual para mostrar los datos actualizados
             setTimeout(() => {
                 location.reload();
             }, 200);

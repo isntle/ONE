@@ -37,7 +37,7 @@ const UI = {
 
         UI.toastContainer.appendChild(toast);
 
-        // Auto remove
+        // Auto eliminar
         setTimeout(() => {
             toast.style.animation = 'fadeOutRight 0.3s forwards';
             setTimeout(() => toast.remove(), 300);
@@ -63,7 +63,7 @@ const UI = {
 
             document.body.appendChild(overlay);
 
-            // Handlers
+            // Manejadores (Handlers)
             const btnCancel = overlay.querySelector('.btn-cancel-ui');
             const btnConfirm = overlay.querySelector('.btn-confirm-ui');
 
@@ -108,7 +108,7 @@ const UI = {
         });
     },
 
-    // --- HELPERS EXISTING ---
+    // --- UTILIDADES EXISTENTES ---
     actualizarTitulo: (titulo) => {
         document.title = `${titulo} | ONE`;
     },

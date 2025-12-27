@@ -14,5 +14,5 @@ class HabitLogViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Return logs for habits owned by the user
+        # Devolver registros de hábitos del usuario actual
         return HabitLog.objects.filter(habit__owner=self.request.user)

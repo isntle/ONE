@@ -99,7 +99,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-# TODO: Switch to PostgreSQL for production
+# POR HACER: Cambiar a PostgreSQL para producción
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',

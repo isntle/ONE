@@ -2,12 +2,12 @@ from rest_framework.authentication import SessionAuthentication
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     """
-    Custom SessionAuthentication that bypasses CSRF validation.
-    This is safe for our use case because:
-    1. We use session cookies for user identification only.
-    2. The frontend and backend are on different ports (cross-origin).
-    3. CORS is properly configured to only allow trusted origins.
+    Autenticación de Sesión personalizada que omite la validación CSRF.
+    Esto es seguro para nuestro caso de uso porque:
+    1. Usamos cookies de sesión solo para identificación de usuario.
+    2. El frontend y backend están en puertos diferentes (cross-origin).
+    3. CORS está configurado adecuadamente para permitir solo orígenes confiables.
     """
 
     def enforce_csrf(self, request):
-        return  # Skip CSRF check entirely
+        return  # Omitir verificación CSRF completamente

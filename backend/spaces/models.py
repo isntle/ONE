@@ -8,7 +8,7 @@ class Space(models.Model):
     name = models.CharField(max_length=50) # Personal, Escuela, Trabajo
     color = models.CharField(max_length=20, default="#FFFFFF")
     
-    # Sync fields
+    # Campos de sincronización
     version = models.IntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

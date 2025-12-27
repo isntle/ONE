@@ -48,7 +48,7 @@ const Store = {
 
         if (data) {
             const parsed = JSON.parse(data);
-            // Filtrado por usuario actual (Multi-User Cache support)
+            // Filtrado por usuario actual (Soporte para múltiples usuarios en caché)
             const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
 
             if (currentUserEmail) {
@@ -77,7 +77,7 @@ const Store = {
                         return h;
                     }));
             } else {
-                // Fallback si no hay usuario logueado (pantalla login?)
+                // Respaldo si no hay usuario logueado
                 Store.state.tareas = [];
                 Store.state.proyectos = [];
                 Store.state.habitos = [];
@@ -338,7 +338,7 @@ const Store = {
 
             Store.guardarEstado();
         } else {
-            console.log("Iniciando aplicación sin datos (Clean Slate)...");
+            console.log("Iniciando aplicación sin datos (Limpieza)...");
             Store.guardarEstado();
         }
     },

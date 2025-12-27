@@ -23,7 +23,7 @@ class Task(models.Model):
     color = models.CharField(max_length=20, default="verde") 
     
     # Status
-    status = models.CharField(max_length=20, default="todo") # todo, done
+    status = models.CharField(max_length=20, default="todo") # todo (por hacer), done (hecho)
     
     # Sync fields
     version = models.IntegerField(default=1)

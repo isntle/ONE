@@ -53,7 +53,7 @@ async function cargarFraseMotivadora() {
     if (!quoteContent) return;
 
     try {
-        // API: Quotable (Free, Open Source)
+        // API: Quotable (Gratis, Código Abierto)
         const response = await fetch('https://api.quotable.io/random?tags=productivity|wisdom|inspirational');
 
         if (!response.ok) throw new Error('API Error');
@@ -62,8 +62,8 @@ async function cargarFraseMotivadora() {
         quoteContent.textContent = `"${data.content}"`;
         quoteAuthor.textContent = `— ${data.author}`;
     } catch (error) {
-        console.warn('API Quote Fallback:', error);
-        // Fallback local si falla la API
+        console.warn('Fallo en API de Citas:', error);
+        // Respaldo local si falla la API
         const frases = [
             { t: "La mejor forma de predecir el futuro es creándolo.", a: "Abraham Lincoln" },
             { t: "La productividad nunca es un accidente. Siempre es el resultado de un compromiso con la excelencia.", a: "Paul J. Meyer" },

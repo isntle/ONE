@@ -8,10 +8,10 @@ from .models import User
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny] # Simplificado para demo
+    permission_classes = [AllowAny] # Simplificado para la demostración
 
     def get_queryset(self):
-        # Opcional: filtrar por usuario actual si fuese prod
+        # Opcional: filtrar por usuario actual si fuera producción
         return User.objects.all()
 
 class RegisterView(views.APIView):
@@ -31,7 +31,7 @@ class LoginView(views.APIView):
         username = request.data.get('username')
         password = request.data.get('password')
         
-        # Intentar autenticar con email si el username falla (opcional, pero útil)
+        # Intentamos entrar con email si falla el usuario (opcional pero útil)
         if not username and 'email' in request.data:
             try:
                 user_obj = User.objects.get(email=request.data['email'])
@@ -60,9 +60,9 @@ class UserMeView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class StreakView(views.APIView):
-    # Solo para usuarios logueados
+    # Solo para usuarios que han iniciado sesión
     def get(self, request):
-        # if not request.user.is_authenticated: return Response(...)
+        # Si no está logueado, podríamos devolver error aquí
         return Response({
             "streak": request.user.streak if request.user.is_authenticated else 0,
             "energy": request.user.energy_level if request.user.is_authenticated else 100

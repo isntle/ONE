@@ -1,6 +1,6 @@
 /*
  * focus.js
- * Lógica para Modo Focus 2.0 (Timer Visual + Audio + Contexto)
+ * Lógica para Modo Focus 2.0
  */
 
 let timerInterval;
@@ -30,8 +30,8 @@ function cargarTareasSetup() {
     const select = document.getElementById('select-tarea-focus');
     const hoy = Store.fechaIsoLocal(new Date());
     // Obtener tareas globales (de todos los espacios) o solo del actual? 
-    // Mejor de todos para "Deep Work" global. O filtrado por espacio actual si queremos consistencia.
-    // Usemos global filter by date = hoy
+    // Mejor de todos para "Trabajo Profundo" global. O filtrado por espacio actual si queremos consistencia.
+    // Usamos filtro global por fecha = hoy
     // Store.state.tareas tiene todo.
 
     const tareasHoy = Store.state.tareas.filter(t => t.fecha === hoy && !t.completada);
@@ -40,7 +40,7 @@ function cargarTareasSetup() {
     if (tareasHoy.length === 0) {
         const option = document.createElement('option');
         option.text = "No tienes tareas pendientes para hoy (Crear una rápida)";
-        option.value = "new"; // Logic to create new inline? Or just generic
+        option.value = "new"; // Lógica para crear nueva en linea? O solo genérica
         select.appendChild(option);
     }
 
@@ -78,11 +78,11 @@ window.iniciarFocus = () => {
         return;
     }
 
-    // UI Switch
+    // Interfaz de Usuario (UI)
     document.getElementById('configuracion-focus').style.display = 'none';
     document.getElementById('sesion-activa').style.display = 'flex';
 
-    // Set Tarea Title
+    // Asignar título de tarea
     if (tareaId === 'generic' || tareaId === 'new') {
         document.getElementById('titulo-tarea-activa').textContent = "Sesión de Enfoque";
     } else {
@@ -136,8 +136,8 @@ async function cargarClima() {
             // UI.js usa SVGs inline, Icons.js usa .svg files. Usemos Lucide JS global si está disponible, o inyectar SVG simple.
             // Dado que Icons.js corre globalmente, usemos un icon name compatible.
 
-            // Map to App Icons names if possible, else standard Lucide names
-            // 'sun' -> no está en icons.js default list? 'cloud-rain' sí.
+            // Mapear a nombres de iconos de la App si es posible, si no usar nombres estándar de Lucide
+            // 'sun' -> ¿no está en la lista de iconos por defecto? 'cloud-rain' sí.
             // Vamos a usar lucide.createIcons() después de inyectar.
 
             el.innerHTML = `
@@ -235,11 +235,11 @@ function finalizar() {
     document.getElementById('configuracion-focus').style.display = 'block';
     document.getElementById('sesion-activa').style.display = 'none';
 
-    tiempoRestante = tiempoTotal; // Reset timer logic
-    setProgress(tiempoTotal); // Full circle
+    tiempoRestante = tiempoTotal; // Reiniciar lógica del temporizador
+    setProgress(tiempoTotal); // Círculo completo
 }
 
-// === AUDIO MIXER ===
+// === MEZCLADOR DE AUDIO ===
 window.toggleAudio = (tipo) => {
     const audio = document.getElementById(`audio-${tipo}`);
     const btn = document.querySelector(`.btn-audio[onclick="toggleAudio('${tipo}')"]`);
@@ -262,7 +262,7 @@ function detenerAudios() {
     });
 }
 
-// Exit Intent Link Override (Header)
+// Sobreescritura de enlaces de salida (Cabecera)
 window.confirmarSalida = async (e) => {
     if (document.getElementById('sesion-activa').style.display === 'flex') {
         e.preventDefault();

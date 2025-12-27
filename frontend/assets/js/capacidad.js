@@ -20,7 +20,7 @@ function calcularCapacidad() {
     tareasHoy.forEach(t => {
         let peso = 1.0; // 1 hora base
         const titulo = (t.titulo || "").toLowerCase();
-        // Keywords de complejidad
+        // Palabras clave de complejidad
         if (titulo.includes('proyecto') || titulo.includes('examen') || titulo.includes('tesis') || titulo.includes('entrega')) {
             peso = 3.0;
         } else if (titulo.includes('leer') || titulo.includes('revisar') || titulo.includes('mail')) {
@@ -40,7 +40,7 @@ function actualizarUI(carga, limite) {
 
     const porcentaje = carga / limite;
 
-    // Reset luces
+    // Reiniciar luces
     document.querySelectorAll('.luz').forEach(l => l.classList.remove('activo'));
     const recomendacion = document.getElementById('dato-recomendacion');
     const estadoTexto = document.getElementById('dato-estado-texto');

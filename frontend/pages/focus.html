@@ -54,7 +54,6 @@
             </aside>
 
             <main class="zona-contenido vista-focus">
-                <!-- Selector de Configuración (Antes de empezar) -->
                 <section id="configuracion-focus" class="panel-configuracion">
                     <h2>Configura tu sesión</h2>
 
@@ -62,7 +61,6 @@
                         <label>¿En qué vas a trabajar?</label>
                         <select id="select-tarea-focus">
                             <option value="">-- Selecciona una tarea de hoy --</option>
-                            <!-- Se llena dinámicamente -->
                         </select>
                     </div>
 
@@ -80,19 +78,16 @@
                     </button>
                 </section>
 
-                <!-- Vista Activa (Timer + Audio) -->
                 <section id="sesion-activa" class="panel-sesion" style="display:none;">
                     <div class="tarea-actual-display" style="position: relative; width: 100%;">
                         <div id="weather-widget"
                             style="position: absolute; right: 0; top: 0; display: flex; align-items: center; gap: 8px; color: var(--color-texto-tenue); font-size: 0.9rem;">
-                            <!-- Clima se carga aquí -->
                         </div>
                         <span class="etiqueta-enfocada">ENFOCADO EN</span>
                         <h1 id="titulo-tarea-activa">Sin Tarea</h1>
                     </div>
 
                     <div class="visualizador-timer">
-                        <!-- Círculo SVG animado -->
                         <svg class="progress-ring" width="300" height="300">
                             <circle class="progress-ring__circle" stroke="var(--color-acento)" stroke-width="8"
                                 fill="transparent" r="140" cx="150" cy="150" />
@@ -125,7 +120,6 @@
         </div>
     </div>
 
-    <!-- Audios locales -->
     <audio id="audio-lluvia" loop src="../assets/audio/lluvia.mp3"></audio>
     <audio id="audio-fuego" loop src="../assets/audio/fuego.mp3"></audio>
     <audio id="audio-cafe" loop src="../assets/audio/cafe.mp3"></audio>

@@ -3,7 +3,7 @@ from django.conf import settings
 import uuid
 
 class Space(models.Model):
-    id = models.CharField(max_length=50, primary_key=True, editable=False)
+    id = models.CharField(max_length=50, primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='spaces')
     name = models.CharField(max_length=50) # Personal, Escuela, Trabajo
     color = models.CharField(max_length=20, default="#FFFFFF")

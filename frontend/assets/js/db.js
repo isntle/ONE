@@ -1,5 +1,5 @@
 /*
- * db.js - IndexedDB Manager para Offline-First
+ * db.js - IndexedDB Manager para hacer que la app funcione offline
  * Maneja almacenamiento local y sincronización con Backend
  */
 
@@ -16,13 +16,13 @@ const DBManager = {
             request.onerror = () => reject(request.error);
             request.onsuccess = () => {
                 db = request.result;
-                console.log('✅ IndexedDB inicializado');
+                console.log('IndexedDB inicializado');
                 resolve(db);
             };
 
             request.onupgradeneeded = (event) => {
                 db = event.target.result;
-                console.log('🔧 Creando esquema de IndexedDB...');
+                console.log('Creando esquema de IndexedDB...');
 
                 // Object Stores (tablas)
                 if (!db.objectStoreNames.contains('tareas')) {
@@ -68,7 +68,7 @@ const DBManager = {
     save: async (storeName, data, fromBackend = false) => {
         if (!db) await DBManager.init();
 
-        // Si viene del backend, ya está sincronizado ('synced'). Si es local, 'pending'.
+        // Si viene del backend, ya está sincronizado. Si es local, 'pending'.
         data.syncStatus = fromBackend ? 'synced' : 'pending';
         if (!fromBackend) data.lastModified = new Date().toISOString();
 
@@ -106,6 +106,73 @@ const DBManager = {
             }
         }
         return cookieValue;
+    },
+
+    normalizePayload: (type, data) => {
+        if (!data || typeof data !== 'object') return data;
+
+        const payload = { ...data };
+        delete payload.syncStatus;
+        delete payload.lastModified;
+        delete payload.espacio_nombre;
+        delete payload.owner_email;
+
+        if (type === 'tareas') {
+            if (payload.horaInicio === '') payload.horaInicio = null;
+            if (payload.horaFin === '') payload.horaFin = null;
+            if (payload.notes !== undefined && payload.notas === undefined) {
+                payload.notas = payload.notes;
+            }
+            delete payload.notes;
+        }
+
+        if (type === 'proyectos') {
+            if (payload.description !== undefined && payload.descripcion === undefined) {
+                payload.descripcion = payload.description;
+            }
+            delete payload.description;
+            if (payload.objetivo === '') {
+                payload.objetivo = null;
+            }
+            if (payload.progreso !== undefined && payload.progreso !== null) {
+                const progresoNum = Number(payload.progreso);
+                if (!Number.isNaN(progresoNum)) payload.progreso = progresoNum;
+            }
+        }
+
+        if (type === 'users') {
+            delete payload.password;
+            delete payload.minutosFocus;
+            delete payload.espaciosHabilitados;
+            delete payload.fechaLogin;
+            delete payload.fechaRegistro;
+        }
+
+        return payload;
+    },
+
+    normalizeFromBackend: (type, data) => {
+        if (!data || typeof data !== 'object') return data;
+
+        const normalized = { ...data };
+        if (type === 'tasks') {
+            if (normalized.notes !== undefined && normalized.notas === undefined) {
+                normalized.notas = normalized.notes;
+            }
+            delete normalized.notes;
+        }
+
+        if (type === 'projects') {
+            if (normalized.description !== undefined && normalized.descripcion === undefined) {
+                normalized.descripcion = normalized.description;
+            }
+            delete normalized.description;
+            if (!normalized.espacio && normalized.espacio_nombre) {
+                normalized.espacio = normalized.espacio_nombre;
+            }
+        }
+
+        return normalized;
     },
 
     getAll: async (storeName) => {
@@ -162,6 +229,12 @@ const DBManager = {
 
         operation.timestamp = Date.now();
         operation.synced = false;
+        const currentUser = (typeof Store !== 'undefined' && Store.state && Store.state.usuario)
+            ? Store.state.usuario
+            : null;
+        operation.owner_email = operation.owner_email
+            || (operation.data && operation.data.owner_email)
+            || (currentUser ? currentUser.email : null);
 
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['outbox'], 'readwrite');
@@ -183,13 +256,33 @@ const DBManager = {
     syncWithBackend: async () => {
         if (!navigator.onLine) {
             console.log('⚠️ Sin conexión. Sincronización pospuesta.');
-            return;
+            return { ok: false, offline: true, failedCount: 0, skippedCount: 0 };
         }
 
         console.log('🔄 Iniciando sincronización con backend...');
 
         const outbox = await DBManager.getAll('outbox');
-        const pending = outbox.filter(op => !op.synced);
+        const currentUserEmail = (typeof Store !== 'undefined' && Store.state && Store.state.usuario)
+            ? Store.state.usuario.email
+            : null;
+        let skippedCount = 0;
+        const pending = outbox.filter(op => {
+            if (op.synced) return false;
+            const opOwner = op.owner_email || (op.data && op.data.owner_email) || null;
+            if (!op.owner_email && opOwner && db) {
+                const transaction = db.transaction(['outbox'], 'readwrite');
+                transaction.objectStore('outbox').put({ ...op, owner_email: opOwner });
+            }
+            if (!currentUserEmail) return true;
+            if (!opOwner) {
+                console.warn('⚠️ Operación sin owner_email, se omite para evitar mezclar usuarios:', op);
+                skippedCount += 1;
+                return false;
+            }
+            return opOwner === currentUserEmail;
+        });
+
+        let failedCount = 0;
 
         for (const operation of pending) {
             try {
@@ -202,41 +295,88 @@ const DBManager = {
                 store.put(operation);
 
             } catch (error) {
+                failedCount += 1;
                 console.error('❌ Error sincronizando:', operation, error);
             }
         }
 
         console.log('✅ Sincronización completada');
+        return { ok: failedCount === 0, failedCount, skippedCount };
     },
 
     executeSync: async (operation) => {
-        const baseUrl = 'http://127.0.0.1:8000/api';
+        const API_HOST = window.location.hostname || 'localhost';
+        const API_PROTOCOL = window.location.protocol === 'file:' ? 'http:' : window.location.protocol;
+        const baseUrl = `${API_PROTOCOL}//${API_HOST === '' ? 'localhost' : API_HOST}:8000/api`;
         const endpoints = {
             'tareas': '/tasks/',
             'proyectos': '/projects/',
             'habitos': '/habits/',
             'habitLogs': '/habit-logs/',
-            'users': '/users/'
+            'users': '/me/',
+            'spaces': '/spaces/'
         };
 
-        const url = baseUrl + endpoints[operation.type];
-        const method = operation.action === 'delete' ? 'DELETE' : 'POST';
+        const endpoint = endpoints[operation.type];
+        if (!endpoint) {
+            throw new Error(`Unknown sync endpoint for type: ${operation.type}`);
+        }
 
-        const response = await fetch(url + (operation.action === 'delete' ? operation.data.id + '/' : ''), {
+        const url = `${baseUrl}${endpoint}`;
+
+        const payload = operation.action !== 'delete'
+            ? DBManager.normalizePayload(operation.type, operation.data)
+            : null;
+
+        let method = 'POST';
+        let urlSuffix = '';
+
+        if (operation.action === 'delete') {
+            method = 'DELETE';
+            urlSuffix = `${operation.data.id}/`;
+        } else if (operation.type === 'users') {
+            // Usuario siempre es PATCH a /api/me/
+            method = 'PATCH';
+        } else if (operation.action === 'upsert') {
+            if (operation.data && operation.data.id) {
+                method = 'PATCH';
+                urlSuffix = `${operation.data.id}/`;
+            } else {
+                method = 'POST';
+            }
+        }
+
+        if (operation.type === 'users') method = 'PATCH';
+
+        let response = await fetch(url + urlSuffix, {
             method,
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': DBManager.getCookie('csrftoken') || ''
             },
             credentials: 'include', // Cookie de sesión
-            body: operation.action !== 'delete' ? JSON.stringify(operation.data) : undefined
+            body: operation.action !== 'delete' ? JSON.stringify(payload) : undefined
         });
+
+        if (!response.ok && method === 'PATCH' && response.status === 404 && operation.action === 'upsert') {
+            response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': DBManager.getCookie('csrftoken') || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+        }
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        return await response.json();
+        if (response.status === 204) return null;
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
     },
 
     // Limpiar outbox sincronizado (mantenimiento)
@@ -260,7 +400,11 @@ const DBManager = {
 
         for (const type of types) {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/api/${type}/`, {
+                const API_HOST = window.location.hostname || 'localhost';
+                const API_PROTOCOL = window.location.protocol === 'file:' ? 'http:' : window.location.protocol;
+                const baseUrl = `${API_PROTOCOL}//${API_HOST === '' ? 'localhost' : API_HOST}:8000/api`;
+
+                const response = await fetch(`${baseUrl}/${type}/`, {
                     credentials: 'include' // Auth cookie
                 });
 
@@ -278,6 +422,7 @@ const DBManager = {
                     if (type === 'habits') Store.state.habitos = []; // La lógica de habits es más compleja por logs, simplificado aquí
 
                     for (const item of data) {
+                        const normalized = DBManager.normalizeFromBackend(type, item);
                         // Transformar keys si es necesario (el Serializer ya las manda "frontend friendly"?)
                         // Nuestro Serializer envia Keys del Backend (id, title, status) O Keys mapeadas?
                         // El Serializer de Tasks OUTPUTS: id, titulo, fecha... (gracias a los fields explícitos)
@@ -285,7 +430,7 @@ const DBManager = {
 
                         // await DBManager.save(localStore, item);
                         // FIX: Usar flag fromBackend=true para no rebotar a outbox
-                        await DBManager.save(localStore, item, true);
+                        await DBManager.save(localStore, normalized, true);
                     }
                 }
             } catch (err) {
@@ -297,6 +442,13 @@ const DBManager = {
         Store.state.tareas = await DBManager.getAll('tareas');
         Store.state.proyectos = await DBManager.getAll('proyectos');
         Store.state.habitos = await DBManager.getAll('habitos');
+
+        const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        if (currentUserEmail) {
+            Store.state.tareas = Store.deduplicarPorId(Store.state.tareas.filter(t => t.owner_email === currentUserEmail));
+            Store.state.proyectos = Store.deduplicarPorId(Store.state.proyectos.filter(p => p.owner_email === currentUserEmail));
+            Store.state.habitos = Store.deduplicarPorId(Store.state.habitos.filter(h => h.owner_email === currentUserEmail));
+        }
         Store.guardarEstado();
         console.log("✅ Datos restaurados del servidor");
     },

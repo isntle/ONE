@@ -94,7 +94,6 @@ function calcularStats(tareas) {
     const elSemana = document.getElementById('stat-semana');
     if (elSemana) elSemana.textContent = tareasSemana;
 
-    // Horas Focus (REALES, persistidas en usuario)
     const minutosFocus = (Store.state.usuario && Store.state.usuario.minutosFocus) ? Store.state.usuario.minutosFocus : 0;
     const horasFocus = (minutosFocus / 60).toFixed(1); // Un decimal ej: 1.5h
     const elFocus = document.getElementById('stat-focus');

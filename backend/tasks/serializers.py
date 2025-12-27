@@ -3,11 +3,25 @@ from .models import Task
 from spaces.models import Space
 
 class TaskSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(required=False)
     # Frontend keys mapping
     titulo = serializers.CharField(source='title', required=False)
     fecha = serializers.DateField(source='date', required=False)
-    horaInicio = serializers.TimeField(source='start_time', required=False, allow_null=True)
-    horaFin = serializers.TimeField(source='end_time', required=False, allow_null=True)
+    horaInicio = serializers.TimeField(
+        source='start_time',
+        required=False,
+        allow_null=True,
+        format='%H:%M',
+        input_formats=['%H:%M', '%H:%M:%S']
+    )
+    horaFin = serializers.TimeField(
+        source='end_time',
+        required=False,
+        allow_null=True,
+        format='%H:%M',
+        input_formats=['%H:%M', '%H:%M:%S']
+    )
+    notas = serializers.CharField(source='notes', required=False, allow_blank=True)
     espacio = serializers.CharField(write_only=True, required=False) # We receive the name
     espacio_nombre = serializers.CharField(source='space.name', read_only=True)
     owner_email = serializers.EmailField(source='owner.email', read_only=True)
@@ -17,7 +31,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             'id', 'titulo', 'fecha', 'horaInicio', 'horaFin', 
-            'color', 'espacio', 'espacio_nombre', 'completada', 'notes', 'status',
+            'color', 'espacio', 'espacio_nombre', 'completada', 'notas', 'status',
             'owner_email'
         ]
         extra_kwargs = {
@@ -59,3 +73,8 @@ class TaskSerializer(serializers.ModelSerializer):
             instance.space = space
             
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['espacio'] = instance.space.name if instance.space else 'Personal'
+        return ret

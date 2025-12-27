@@ -24,11 +24,27 @@ const Store = {
     },
 
     // --- CARGA Y GUARDADO ---
+    deduplicarPorId: (items) => {
+        const uniques = new Map();
+        (items || []).forEach(item => {
+            if (!item || item.id == null) return;
+            const key = String(item.id);
+            if (!uniques.has(key)) uniques.set(key, item);
+        });
+        return Array.from(uniques.values());
+    },
+    generarId: () => {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+            return crypto.randomUUID();
+        }
+        return `${Date.now().toString()}-${Math.random().toString(16).slice(2)}`;
+    },
+
     cargarDatos: () => {
         const usuario = localStorage.getItem(Store.KEYS.USUARIO);
         const data = localStorage.getItem(Store.KEYS.DATA);
 
-        if (usuario) Store.state.usuario = JSON.parse(usuario);
+        if (usuario) Store.guardarUsuario(JSON.parse(usuario));
 
         if (data) {
             const parsed = JSON.parse(data);
@@ -36,18 +52,30 @@ const Store = {
             const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
 
             if (currentUserEmail) {
-                Store.state.tareas = (parsed.tareas || []).filter(t => t.owner_email === currentUserEmail);
-                Store.state.proyectos = (parsed.proyectos || []).filter(p => p.owner_email === currentUserEmail);
+                const tareasConOwner = (parsed.tareas || []).map(t => {
+                    if (t && !t.owner_email) return { ...t, owner_email: currentUserEmail };
+                    return t;
+                });
+                const proyectosConOwner = (parsed.proyectos || []).map(p => {
+                    if (p && !p.owner_email) return { ...p, owner_email: currentUserEmail };
+                    return p;
+                });
+                const habitosConOwner = (parsed.habitos || []).map(h => {
+                    if (h && !h.owner_email) return { ...h, owner_email: currentUserEmail };
+                    return h;
+                });
 
-                let habitosCrudos = parsed.habitos || [];
-                Store.state.habitos = habitosCrudos
+                Store.state.tareas = Store.deduplicarPorId(tareasConOwner.filter(t => t.owner_email === currentUserEmail));
+                Store.state.proyectos = Store.deduplicarPorId(proyectosConOwner.filter(p => p.owner_email === currentUserEmail));
+
+                Store.state.habitos = Store.deduplicarPorId(habitosConOwner
                     .filter(h => h.owner_email === currentUserEmail)
                     .map(h => {
                         if (typeof h.nombre === 'object' && h.nombre !== null) {
                             h.nombre = h.nombre.nombre || "Nuevo Hábito";
                         }
                         return h;
-                    });
+                    }));
             } else {
                 // Fallback si no hay usuario logueado (pantalla login?)
                 Store.state.tareas = [];
@@ -65,6 +93,10 @@ const Store = {
     },
 
     guardarEstado: () => {
+        Store.state.tareas = Store.deduplicarPorId(Store.state.tareas);
+        Store.state.proyectos = Store.deduplicarPorId(Store.state.proyectos);
+        Store.state.habitos = Store.deduplicarPorId(Store.state.habitos);
+
         const data = {
             tareas: Store.state.tareas,
             proyectos: Store.state.proyectos,
@@ -77,10 +109,29 @@ const Store = {
     obtenerUsuario: () => Store.state.usuario,
 
     guardarUsuario: (user) => {
-        // Asegurar que tenga campo minutosFocus
-        if (!user.minutosFocus) user.minutosFocus = 0;
-        Store.state.usuario = user;
-        localStorage.setItem(Store.KEYS.USUARIO, JSON.stringify(user));
+        const usuario = { ...user };
+        if (!usuario.preferences) usuario.preferences = {};
+
+        if (usuario.minutosFocus == null) {
+            usuario.minutosFocus = usuario.preferences.minutosFocus || 0;
+        }
+        usuario.preferences.minutosFocus = usuario.minutosFocus;
+
+        if (usuario.espaciosHabilitados && Array.isArray(usuario.espaciosHabilitados)) {
+            usuario.preferences.espaciosHabilitados = usuario.espaciosHabilitados;
+        } else if (Array.isArray(usuario.preferences.espaciosHabilitados)) {
+            usuario.espaciosHabilitados = usuario.preferences.espaciosHabilitados;
+        } else {
+            usuario.espaciosHabilitados = ['Personal', 'Escuela', 'Trabajo'];
+            usuario.preferences.espaciosHabilitados = usuario.espaciosHabilitados;
+        }
+
+        if (!usuario.email && usuario.username) {
+            usuario.email = usuario.username;
+        }
+
+        Store.state.usuario = usuario;
+        localStorage.setItem(Store.KEYS.USUARIO, JSON.stringify(usuario));
     },
 
     registrarTiempoFocus: (minutos) => {
@@ -88,12 +139,23 @@ const Store = {
         if (!Store.state.usuario.minutosFocus) Store.state.usuario.minutosFocus = 0;
         Store.state.usuario.minutosFocus += minutos;
         Store.guardarUsuario(Store.state.usuario);
+        if (typeof DBManager !== 'undefined') {
+            DBManager.save('users', Store.state.usuario);
+        }
         console.log(`⏱️ Tiempo focus registrado: +${minutos}m. Total: ${Store.state.usuario.minutosFocus}m`);
     },
 
     cerrarSesion: () => {
-        localStorage.clear();  // Limpia usuario activo
-        location.reload();     // Recarga App, Store.cargarDatos filtrará (y no encontrará usuario, so empty)
+        const limpiarYRecargar = () => {
+            localStorage.clear();
+            location.reload();
+        };
+
+        if (typeof DBManager !== 'undefined') {
+            DBManager.clearAll().then(limpiarYRecargar).catch(limpiarYRecargar);
+        } else {
+            limpiarYRecargar();
+        }
     },
 
     // --- ESPACIOS ---
@@ -108,12 +170,17 @@ const Store = {
     // --- TAREAS ---
     obtenerTareas: () => {
         // Retorna tareas filtradas por el espacio actual
-        return Store.state.tareas.filter(t => t.espacio === Store.state.espacioActual);
+        const tareas = Store.deduplicarPorId(Store.state.tareas);
+        const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        return tareas.filter(t => {
+            if (currentUserEmail && t.owner_email && t.owner_email !== currentUserEmail) return false;
+            return t.espacio === Store.state.espacioActual;
+        });
     },
 
     agregarTarea: (tarea) => {
         const nuevaTarea = {
-            id: Date.now(),
+            id: Store.generarId(),
             espacio: Store.state.espacioActual,
             completada: false,
             owner_email: Store.state.usuario ? Store.state.usuario.email : null,
@@ -129,16 +196,18 @@ const Store = {
     },
 
     eliminarTarea: (id) => {
-        Store.state.tareas = Store.state.tareas.filter(t => t.id !== id);
+        const tarea = Store.state.tareas.find(t => String(t.id) === String(id));
+        const targetId = tarea ? tarea.id : id;
+        Store.state.tareas = Store.state.tareas.filter(t => String(t.id) !== String(id));
         Store.guardarEstado();
         // SYNC: Registrar borrado
         if (typeof DBManager !== 'undefined') {
-            DBManager.delete('tareas', id);
+            DBManager.delete('tareas', targetId);
         }
     },
 
     actualizarTarea: (id, cambios) => {
-        const index = Store.state.tareas.findIndex(t => t.id === id);
+        const index = Store.state.tareas.findIndex(t => String(t.id) === String(id));
         if (index !== -1) {
             Store.state.tareas[index] = { ...Store.state.tareas[index], ...cambios };
             Store.guardarEstado();
@@ -153,14 +222,22 @@ const Store = {
 
     // --- PROYECTOS ---
     obtenerProyectos: () => {
-        return Store.state.proyectos.filter(p => p.espacio === Store.state.espacioActual);
+        const proyectos = Store.deduplicarPorId(Store.state.proyectos);
+        const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        return proyectos.filter(p => {
+            if (currentUserEmail && p.owner_email && p.owner_email !== currentUserEmail) return false;
+            const espacio = p.espacio || p.espacio_nombre;
+            return espacio === Store.state.espacioActual;
+        });
     },
 
     agregarProyecto: (proyecto) => {
         const nuevoProyecto = {
-            id: Date.now(),
+            id: Store.generarId(),
             espacio: Store.state.espacioActual,
             progreso: 0,
+            notas: '',
+            tareas: [],
             owner_email: Store.state.usuario ? Store.state.usuario.email : null,
             ...proyecto
         };
@@ -172,18 +249,51 @@ const Store = {
         }
     },
 
+    actualizarProyecto: (id, cambios) => {
+        const index = Store.state.proyectos.findIndex(p => String(p.id) === String(id));
+        if (index !== -1) {
+            Store.state.proyectos[index] = { ...Store.state.proyectos[index], ...cambios };
+            Store.guardarEstado();
+            if (typeof DBManager !== 'undefined') {
+                DBManager.save('proyectos', Store.state.proyectos[index]);
+            }
+            return Store.state.proyectos[index];
+        }
+        return null;
+    },
+
     eliminarProyecto: (id) => {
+        const proyecto = Store.state.proyectos.find(p => String(p.id) === String(id));
+        const targetId = proyecto ? proyecto.id : id;
         Store.state.proyectos = Store.state.proyectos.filter(p => String(p.id) !== String(id));
         Store.guardarEstado();
         // SYNC
         if (typeof DBManager !== 'undefined') {
-            DBManager.delete('proyectos', id);
+            DBManager.delete('proyectos', targetId);
         }
+    },
+
+    actualizarProyecto: (id, cambios) => {
+        const index = Store.state.proyectos.findIndex(p => String(p.id) === String(id));
+        if (index !== -1) {
+            Store.state.proyectos[index] = { ...Store.state.proyectos[index], ...cambios };
+            Store.guardarEstado();
+            if (typeof DBManager !== 'undefined') {
+                DBManager.save('proyectos', Store.state.proyectos[index]);
+            }
+            return Store.state.proyectos[index];
+        }
+        return null;
     },
 
     // --- HÁBITOS (Globales, no por espacio necesariamente, o sí?) ---
     // Por simplicidad, los hábitos son globales por ahora
-    obtenerHabitos: () => Store.state.habitos,
+    obtenerHabitos: () => {
+        const habitos = Store.deduplicarPorId(Store.state.habitos);
+        const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        if (!currentUserEmail) return habitos;
+        return habitos.filter(h => !h.owner_email || h.owner_email === currentUserEmail);
+    },
 
     guardarHabitos: (habitos) => {
         Store.state.habitos = habitos;
@@ -245,7 +355,7 @@ const Store = {
 
     // --- HÁBITOS HELPERS ---
     toggleHabitoDia: (idHabito, fechaIso, nota = "") => {
-        const habito = Store.state.habitos.find(h => h.id === idHabito);
+        const habito = Store.state.habitos.find(h => String(h.id) === String(idHabito));
         if (habito) {
             if (!habito.registros) habito.registros = {};
 
@@ -277,7 +387,7 @@ const Store = {
         else if (data && data.nombre) nombreVal = data.nombre;
 
         const nuevoHabito = {
-            id: Date.now(),
+            id: Store.generarId(),
             nombre: String(nombreVal),
             registros: {},
             owner_email: Store.state.usuario ? Store.state.usuario.email : null
@@ -292,11 +402,13 @@ const Store = {
 
     eliminarHabito: (id) => {
         // Comparación flexible (número o string)
+        const habito = Store.state.habitos.find(h => String(h.id) === String(id));
+        const targetId = habito ? habito.id : id;
         Store.state.habitos = Store.state.habitos.filter(h => String(h.id) !== String(id));
         Store.guardarEstado();
         // SYNC
         if (typeof DBManager !== 'undefined') {
-            DBManager.delete('habitos', id);
+            DBManager.delete('habitos', targetId);
         }
     }
 };

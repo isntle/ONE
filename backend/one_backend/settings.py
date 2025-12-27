@@ -22,6 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-usx6a$iz1_)udz+r(vp$w!c=jiw@-smg_%k6m4c%s=!r06ei&('
 
+# Allow cookies in cross-origin requests (for local development)
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # Only for development
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Only for development
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -162,7 +168,7 @@ AUTH_USER_MODEL = 'accounts.User'
 # Django Rest Framework Settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'accounts.authentication.CsrfExemptSessionAuthentication',
+        'one_backend.auth.CsrfExemptSessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
 }

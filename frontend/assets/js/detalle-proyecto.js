@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentProject = null;
 
+function syncProyecto(changes) {
+    const updated = Store.actualizarProyecto(currentProject.id, changes);
+    if (updated) currentProject = updated;
+}
+
 function cargarDatosProyecto(id) {
     const proyectos = Store.state.proyectos;
     currentProject = proyectos.find(p => p.id == id);
@@ -54,8 +59,7 @@ function cargarDatosProyecto(id) {
 
     // Guardar cambios en el editor al escribir
     editor.addEventListener('input', () => {
-        currentProject.notas = editor.innerHTML;
-        Store.guardarEstado();
+        syncProyecto({ notas: editor.innerHTML });
     });
 }
 
@@ -128,7 +132,7 @@ function renderizarTareas() {
 
         item.addEventListener('click', () => {
             t.completada = !t.completada;
-            Store.guardarEstado();
+            syncProyecto({ tareas: currentProject.tareas });
             renderizarTareas();
             actualizarProgresoUI();
         });
@@ -153,8 +157,7 @@ function actualizarProgresoUI() {
     document.getElementById('progreso-texto').textContent = `${progreso}%`;
     document.getElementById('progreso-barra-fill').style.width = `${progreso}%`;
 
-    currentProject.progreso = progreso;
-    Store.guardarEstado();
+    syncProyecto({ progreso: progreso });
 }
 
 // === FUNCIONES DEL EDITOR RICO ===
@@ -206,7 +209,7 @@ function activarInputNuevaTarea() {
                 texto: texto,
                 completada: false
             });
-            Store.guardarEstado();
+            syncProyecto({ tareas: currentProject.tareas });
             renderizarTareas();
             actualizarProgresoUI();
         } else {

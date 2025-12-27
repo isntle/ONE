@@ -45,6 +45,12 @@ const Auth = {
         }
     },
 
+    obtenerApiUrl: () => {
+        const API_HOST = window.location.hostname || 'localhost';
+        const API_PROTOCOL = window.location.protocol === 'file:' ? 'http:' : window.location.protocol;
+        return `${API_PROTOCOL}//${API_HOST === '' ? 'localhost' : API_HOST}:8000/api`;
+    },
+
     configurarLogin: (form) => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -57,62 +63,97 @@ const Auth = {
             }
 
             try {
-                // 1. Buscar usuario por email en IndexedDB (Local)
+                const API_URL = Auth.obtenerApiUrl();
+                let backendStatus = null;
+                let backendUser = null;
+
+                if (navigator.onLine) {
+                    try {
+                        const response = await fetch(`${API_URL}/login/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ username: email, email: email, password: password })
+                        });
+
+                        backendStatus = response.status;
+                        if (response.ok) {
+                            backendUser = await response.json();
+                        }
+                    } catch (err) {
+                        console.error("Error conectando con servidor:", err);
+                    }
+                }
+
+                if (backendUser) {
+                    const userForLocal = { ...backendUser, password };
+                    await DBManager.save('users', userForLocal, true);
+                    Store.guardarUsuario(userForLocal);
+
+                    const syncResult = await DBManager.syncWithBackend();
+                    if (!syncResult || syncResult.ok) {
+                        await DBManager.loadAllFromBackend();
+                    } else {
+                        UI.toast("Hay cambios pendientes sin sincronizar. Usando datos locales.", "warning");
+                    }
+
+                    window.location.href = 'semana.html';
+                    return;
+                }
+
+                // Fallback local si no hay login remoto
                 const usuarios = await DBManager.getByIndex('users', 'email', email);
 
                 if (usuarios && usuarios.length > 0) {
                     const usuario = usuarios[0];
                     if (usuario.password === password) {
-                        // Login Local Exitoso
                         console.log("Login Local");
                         usuario.fechaLogin = new Date().toISOString();
-                        await DBManager.save('users', usuario);
+                        await DBManager.save('users', usuario, true);
                         Store.guardarUsuario(usuario);
+
+                        if (navigator.onLine && backendStatus === 401) {
+                            const registroResponse = await fetch(`${API_URL}/register/`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    username: email,
+                                    nombre: usuario.nombre || email,
+                                    email: email,
+                                    password: password
+                                })
+                            });
+
+                            if (registroResponse.ok) {
+                                const nuevoBackend = await registroResponse.json();
+                                const userLocal = { ...nuevoBackend, password };
+                                await DBManager.save('users', userLocal, true);
+                                Store.guardarUsuario(userLocal);
+
+                                const loginResponse = await fetch(`${API_URL}/login/`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    credentials: 'include',
+                                    body: JSON.stringify({ username: email, email: email, password: password })
+                                });
+
+                                if (loginResponse.ok) {
+                                    const syncResult = await DBManager.syncWithBackend();
+                                    if (!syncResult || syncResult.ok) {
+                                        await DBManager.loadAllFromBackend();
+                                    } else {
+                                        UI.toast("Hay cambios pendientes sin sincronizar. Usando datos locales.", "warning");
+                                    }
+                                }
+                            }
+                        }
+
                         window.location.href = 'semana.html';
                         return;
-                    } else {
-                        console.warn("Contraseña local incorrecta. Intentando con servidor...");
-                        // NO HACEMOS RETURN, dejamos que pase al bloque de abajo (Backend)
-                        // UI.toast("Contraseña incorrecta (Local)", "error"); 
                     }
                 }
 
-                // 2. Si no esta en local, intentar en Backend (Nube)
-                console.log("☁️ Buscando usuario en la nube...");
-                try {
-                    const response = await fetch('http://127.0.0.1:8000/api/login/', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ username: email, email: email, password: password })
-                    });
-
-                    if (response.ok) {
-                        const userBackend = await response.json();
-                        console.log("✅ Login Remoto Exitoso", userBackend);
-
-
-                        // Limpiar estado previo
-                        Store.state.tareas = [];
-                        Store.state.proyectos = [];
-                        Store.state.habitos = [];
-                        localStorage.clear();
-
-                        await DBManager.save('users', userBackend);
-                        Store.guardarUsuario(userBackend);
-
-                        // RESTAURAR DATOS
-                        await DBManager.loadAllFromBackend();
-
-                        window.location.href = 'semana.html';
-                    } else {
-                        UI.alert({ titulo: "Error", mensaje: "Credenciales inválidas" });
-                    }
-                } catch (err) {
-                    console.error("Error conectando con servidor:", err);
-                    UI.alert({ titulo: "Error", mensaje: "No existe cuenta local y no se pudo conectar al servidor." });
-                }
-
+                UI.alert({ titulo: "Error", mensaje: "Credenciales inválidas" });
             } catch (error) {
                 console.error("Error en login:", error);
                 UI.toast("Error al iniciar sesión. Intenta de nuevo.", "error");
@@ -142,22 +183,20 @@ const Auth = {
             }
 
             try {
-                // Verificar si ya existe
                 const existentes = await DBManager.getByIndex('users', 'email', email);
                 if (existentes && existentes.length > 0) {
                     UI.alert({ titulo: "Atención", mensaje: "Este correo ya está registrado" });
                     return;
                 }
 
-                // Crear usuario
                 const nuevoUsuario = {
-                    id: Date.now().toString(), // ID único string
-                    username: email, // REQUIRED for Django User model
+                    id: Date.now().toString(),
+                    username: email,
                     nombre: nombre,
                     email: email,
-                    password: password, // En producción HASHEAR esto
+                    password: password,
                     fechaRegistro: new Date().toISOString(),
-                    espaciosHabilitados: ['Personal', 'Escuela', 'Trabajo'], // Default todos
+                    espaciosHabilitados: ['Personal', 'Escuela', 'Trabajo'],
                     minutosFocus: 0
                 };
 
@@ -166,18 +205,42 @@ const Auth = {
                 Store.state.habitos = [];
                 Store.state.usuario = null;
                 Store.guardarEstado();
-                localStorage.clear(); // Limpiar todo el storage para asegurar
+                localStorage.clear();
 
-                // Guardar usuario para envio
-                await DBManager.save('users', nuevoUsuario);
+                const API_URL = Auth.obtenerApiUrl();
 
-                // Forzar sincronización
-                console.log("⏳ Sincronizando registro con backend...");
-                await DBManager.syncWithBackend();
+                if (navigator.onLine) {
+                    const response = await fetch(`${API_URL}/register/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username: email,
+                            nombre: nombre,
+                            email: email,
+                            password: password
+                        })
+                    });
 
-                UI.toast("Cuenta creada correctamente. Por favor inicia sesión.", "success");
+                    if (response.ok) {
+                        const userBackend = await response.json();
+                        const userLocal = { ...userBackend, password };
+                        await DBManager.save('users', userLocal, true);
 
-                // Redirigir al LOGIN (no al dashboard) para forzar sesión limpia
+                        UI.toast("Cuenta creada correctamente. Por favor inicia sesión.", "success");
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                        return;
+                    }
+
+                    if (response.status === 400) {
+                        UI.alert({ titulo: "Atención", mensaje: "Este correo ya está registrado" });
+                        return;
+                    }
+                }
+
+                await DBManager.save('users', nuevoUsuario, true);
+                UI.toast("Cuenta creada localmente. Inicia sesión para sincronizar.", "info");
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);

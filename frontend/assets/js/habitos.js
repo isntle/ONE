@@ -118,7 +118,7 @@ function renderizarHabitos() {
         divNombre.className = 'nombre-habito-container';
         divNombre.innerHTML = `
             <span class="nombre-texto">${habito.nombre}</span>
-            <button class="btn-eliminar-habito" onclick="confirmarEliminarHabito(${habito.id})" title="Eliminar hábito">
+            <button class="btn-eliminar-habito" onclick="confirmarEliminarHabito('${habito.id}')" title="Eliminar hábito">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
             </button>
         `;
@@ -150,11 +150,13 @@ function renderizarHabitos() {
         fila.appendChild(divMarcas);
         contenedorFilas.appendChild(fila);
     });
+
+    actualizarResumenHabitos(habitos, fechasMostradas);
 }
 
 window.confirmarEliminarHabito = async (id) => {
     const listado = Store.obtenerHabitos();
-    const habito = listado.find(h => h.id === id);
+    const habito = listado.find(h => String(h.id) === String(id));
     const nombre = habito ? habito.nombre : 'este hábito';
 
     const confirmado = await UI.confirm({
@@ -218,4 +220,63 @@ function activarInputNuevoHabito() {
     input.addEventListener('blur', () => {
         setTimeout(() => { if (!yaGuardado) guardar(); }, 100);
     });
+}
+
+function actualizarResumenHabitos(habitos, fechasMostradas) {
+    const rachaEl = document.getElementById('racha-valor');
+    const activosEl = document.getElementById('habitos-activos-valor');
+    const perfectosEl = document.getElementById('dias-perfectos-valor');
+
+    const totalHabitos = habitos.length;
+    const racha = calcularRacha(habitos);
+    const diasPerfectos = calcularDiasPerfectos(habitos, fechasMostradas);
+
+    if (rachaEl) rachaEl.textContent = `${racha} día${racha === 1 ? '' : 's'}`;
+    if (activosEl) activosEl.textContent = `${totalHabitos}`;
+    if (perfectosEl) perfectosEl.textContent = `${diasPerfectos}`;
+}
+
+function calcularRacha(habitos) {
+    if (!habitos || habitos.length === 0) return 0;
+
+    const fechasConHabitos = new Set();
+    habitos.forEach(habito => {
+        const registros = habito.registros || {};
+        Object.keys(registros).forEach(fechaIso => {
+            if (registros[fechaIso] && registros[fechaIso].completado) {
+                fechasConHabitos.add(fechaIso);
+            }
+        });
+    });
+
+    if (fechasConHabitos.size === 0) return 0;
+
+    let racha = 0;
+    const cursor = new Date();
+    cursor.setHours(0, 0, 0, 0);
+
+    while (true) {
+        const iso = Store.fechaIsoLocal(cursor);
+        if (!fechasConHabitos.has(iso)) break;
+        racha += 1;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+
+    return racha;
+}
+
+function calcularDiasPerfectos(habitos, fechasMostradas) {
+    if (!habitos || habitos.length === 0) return 0;
+    if (!fechasMostradas || fechasMostradas.length === 0) return 0;
+
+    let perfectos = 0;
+    fechasMostradas.forEach(fecha => {
+        const completo = habitos.every(h => {
+            const registro = h.registros ? h.registros[fecha.iso] : null;
+            return registro && registro.completado;
+        });
+        if (completo) perfectos += 1;
+    });
+
+    return perfectos;
 }

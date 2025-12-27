@@ -254,13 +254,13 @@ function renderizarColumnaDia(contenedor, fecha, todasLasTareas, opciones = {}) 
         const iconoCheck = t.completada ? 'check-circle-2' : 'circle';
 
         htmlTareas += `
-            <li class="bloque ${claseColor} ${completadaClass}" onclick="abrirModalEdicion(${t.id})">
+            <li class="bloque ${claseColor} ${completadaClass}" onclick="abrirModalEdicion('${t.id}')">
                 <div class="contenido-bloque">
                     <div class="titulo-y-hora">
                         <div class="titulo-bloque">${t.titulo}</div>
                         ${!opciones.modoMes ? `<span class="hora-tarea">${t.horaInicio || ''}</span>` : ''}
                     </div>
-                    <button class="btn-check-tarea" onclick="toggleCompletada(event, ${t.id})">
+                    <button class="btn-check-tarea" onclick="toggleCompletada(event, '${t.id}')">
                         <i data-lucide="${iconoCheck}"></i>
                     </button>
                 </div>
@@ -291,7 +291,7 @@ function renderizarColumnaDia(contenedor, fecha, todasLasTareas, opciones = {}) 
 // === TOGGLE COMPLETADA ===
 window.toggleCompletada = (e, tareaId) => {
     e.stopPropagation(); // Evitar abrir el modal
-    const tarea = Store.state.tareas.find(t => t.id === tareaId);
+    const tarea = Store.state.tareas.find(t => String(t.id) === String(tareaId));
     if (tarea) {
         Store.actualizarTarea(tareaId, { completada: !tarea.completada });
         renderizarVista();
@@ -300,7 +300,7 @@ window.toggleCompletada = (e, tareaId) => {
 
 // === MODAL DE EDICIÓN ===
 window.abrirModalEdicion = (tareaId) => {
-    const tarea = Store.state.tareas.find(t => t.id === tareaId);
+    const tarea = Store.state.tareas.find(t => String(t.id) === String(tareaId));
     if (!tarea) return;
 
     const overlay = document.createElement('div');
@@ -327,11 +327,11 @@ window.abrirModalEdicion = (tareaId) => {
             <div class="modal-campo" style="display: flex; gap: 10px;">
                 <div style="flex: 1;">
                     <label>Inicio</label>
-                    <input type="time" id="modal-hora-inicio" value="${tarea.horaInicio}" />
+                    <input type="time" id="modal-hora-inicio" value="${tarea.horaInicio ? tarea.horaInicio.slice(0, 5) : ''}" />
                 </div>
                 <div style="flex: 1;">
                     <label>Fin</label>
-                    <input type="time" id="modal-hora-fin" value="${tarea.horaFin}" />
+                    <input type="time" id="modal-hora-fin" value="${tarea.horaFin ? tarea.horaFin.slice(0, 5) : ''}" />
                 </div>
             </div>
             <div class="modal-campo">
@@ -360,8 +360,8 @@ window.abrirModalEdicion = (tareaId) => {
                 </div>
             </div>
             <div class="modal-acciones">
-                <button class="btn-eliminar" onclick="eliminarTareaModal(${tarea.id})">Eliminar</button>
-                <button class="btn-guardar" onclick="guardarEdicion(${tarea.id})">Guardar</button>
+                <button class="btn-eliminar" onclick="eliminarTareaModal('${tarea.id}')">Eliminar</button>
+                <button class="btn-guardar" onclick="guardarEdicion('${tarea.id}')">Guardar</button>
             </div>
         </div>
     `;
@@ -452,7 +452,7 @@ window.activarInputRegistro = (btn, fechaIso) => {
         const titulo = input.value.trim();
         if (titulo) {
             yaGuardado = true;
-            Store.agregarTarea({ titulo, fecha: fechaIso, horaInicio: "12:00", horaFin: "13:00", color: "verde", completada: false });
+            Store.agregarTarea({ titulo, fecha: fechaIso, color: "verde", completada: false });
             renderizarVista();
         } else {
             input.remove();

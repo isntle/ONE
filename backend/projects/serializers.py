@@ -3,10 +3,14 @@ from .models import Project
 from spaces.models import Space
 
 class ProjectSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(required=False)
     # Frontend keys mapping
     titulo = serializers.CharField(source='title', required=False)
     objetivo = serializers.DateField(source='due_date', required=False, allow_null=True)
     progreso = serializers.IntegerField(source='progress', required=False)
+    descripcion = serializers.CharField(source='description', required=False, allow_blank=True, allow_null=True)
+    notas = serializers.CharField(source='notes', required=False, allow_blank=True, allow_null=True)
+    tareas = serializers.JSONField(source='project_tasks', required=False)
     espacio = serializers.CharField(write_only=True, required=False)
     espacio_nombre = serializers.CharField(source='space.name', read_only=True)
     owner_email = serializers.EmailField(source='owner.email', read_only=True)
@@ -15,7 +19,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             'id', 'titulo', 'objetivo', 'progreso', 'color', 
-            'espacio', 'espacio_nombre', 'description', 'etiquetas', 'owner_email'
+            'espacio', 'espacio_nombre', 'descripcion', 'etiquetas', 'notas', 'tareas', 'owner_email'
         ]
 
     def to_internal_value(self, data):
@@ -40,3 +44,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             space, _ = Space.objects.get_or_create(owner=user, name=espacio_name)
             instance.space = space
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['espacio'] = instance.space.name if instance.space else 'Personal'
+        return ret

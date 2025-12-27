@@ -1,6 +1,6 @@
-from rest_framework import status, views, viewsets
+from rest_framework import status, views, viewsets, permissions
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import UserSerializer
 from django.contrib.auth import authenticate, login
 from .models import User
@@ -45,6 +45,19 @@ class LoginView(views.APIView):
             login(request, user)
             return Response(UserSerializer(user).data)
         return Response({"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
+
+class UserMeView(views.APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        return Response(UserSerializer(request.user).data)
+    
+    def patch(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class StreakView(views.APIView):
     # Solo para usuarios logueados

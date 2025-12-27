@@ -76,7 +76,7 @@ function renderizarProyectos() {
         article.innerHTML = `
             <div class="proyecto-header-wrapper">
                 <div class="titulo-proyecto">${p.titulo || 'Sin título'}</div>
-                <button class="btn-eliminar-proyecto" onclick="event.stopPropagation(); confirmarEliminarProyecto(${p.id})" title="Eliminar proyecto">
+                <button class="btn-eliminar-proyecto" onclick="event.stopPropagation(); confirmarEliminarProyecto('${p.id}')" title="Eliminar proyecto">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                 </button>
             </div>
@@ -172,9 +172,9 @@ window.abrirModalCreacion = (proyectoEditar = null) => {
             </div>
 
             <div class="modal-acciones">
-                ${proyectoEditar ? `<button class="btn-cancelar" style="color:#EF4444; margin-right:auto;" onclick="borrarProyecto(${idProyecto})">Eliminar</button>` : ''}
+                ${proyectoEditar ? `<button class="btn-cancelar" style="color:#EF4444; margin-right:auto;" onclick="borrarProyecto('${idProyecto}')">Eliminar</button>` : ''}
                 <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
-                <button class="btn-crear" onclick="guardarProyecto(${idProyecto})">${proyectoEditar ? 'Guardar Cambios' : 'Crear Proyecto'}</button>
+                <button class="btn-crear" onclick="guardarProyecto('${idProyecto}')">${proyectoEditar ? 'Guardar Cambios' : 'Crear Proyecto'}</button>
             </div>
         </div>
     `;
@@ -205,16 +205,13 @@ window.guardarProyecto = (idExistente) => {
     if (idExistente && idExistente !== '' && idExistente !== 'undefined') {
         // Editar
         console.log('Editando proyecto con ID:', idExistente);
-        const proyectos = Store.state.proyectos;
-        const index = proyectos.findIndex(p => p.id == idExistente);
-        if (index !== -1) {
-            proyectos[index].titulo = titulo;
-            proyectos[index].descripcion = desc;
-            proyectos[index].color = color;
-            proyectos[index].objetivo = fecha;
-            proyectos[index].etiquetas = tags;
-            Store.guardarEstado();
-        }
+        Store.actualizarProyecto(idExistente, {
+            titulo: titulo,
+            descripcion: desc,
+            color: color,
+            objetivo: fecha || null,
+            etiquetas: tags
+        });
     } else {
         // Crear
         console.log('Creando nuevo proyecto');
@@ -223,7 +220,7 @@ window.guardarProyecto = (idExistente) => {
             descripcion: desc,
             etiquetas: tags,
             color: color || '#8B5CF6',
-            objetivo: fecha,
+            objetivo: fecha || null,
             progreso: 0
         });
     }
@@ -245,8 +242,7 @@ window.borrarProyecto = async (id) => {
     });
 
     if (confirmado) {
-        Store.state.proyectos = Store.state.proyectos.filter(p => p.id != id);
-        Store.guardarEstado();
+        Store.eliminarProyecto(id);
         cerrarModal(); // Si se llamó desde el modal
         renderizarProyectos();
     }

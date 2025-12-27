@@ -87,7 +87,11 @@ function cargarDatosUsuario() {
                 UI.toast("Guardando cambios...", "info");
                 try {
                     if (typeof DBManager !== 'undefined') {
-                        await DBManager.syncWithBackend();
+                        const syncResult = await DBManager.syncWithBackend();
+                        if (syncResult && !syncResult.ok) {
+                            UI.toast("No se pudieron sincronizar todos los cambios. Reintenta con conexión.", "error");
+                            return;
+                        }
                     }
                 } catch (e) {
                     console.error("Error sync logout:", e);

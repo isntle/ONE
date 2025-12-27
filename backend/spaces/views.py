@@ -6,9 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 class SpaceViewSet(viewsets.ModelViewSet):
     queryset = Space.objects.all()
     serializer_class = SpaceSerializer
-    # permission_classes = [IsAuthenticated] # Descomentar cuando Auth esté listo en frontend
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        # Filtrar por usuario logueado (si hay auth)
-        # return self.queryset.filter(owner=self.request.user)
-        return self.queryset
+        return Space.objects.filter(owner=self.request.user)

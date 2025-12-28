@@ -1,7 +1,9 @@
-# Manual Técnico — ONE
-
+# Manual Técnico — ONE 
 **Fecha:** 2025-12-27  
 **Autor:** Luis Ernesto Mérida de León  
+**Profesora:** Rocio Garcia Cortes
+<br>
+**Asignatura:** Desarrollo de Aplicaciones Web
 
 ---
 
@@ -21,7 +23,6 @@
 12. [Limitaciones y mejoras futuras](#12-limitaciones-y-mejoras-futuras)  
 13. [Apéndices](#13-apéndices)  
 
----
 
 ## 1. Contexto y propósito
 
@@ -41,6 +42,9 @@ Mi intención con el manual es que cualquier persona pueda:
 La idea de la aplicación que quise construir es una que permita **gestionar la vida de los usuarios**, sin depender de qué tipo de usuario es: ya sea un estudiante, una persona normal o una persona trabajadora.
 
 La idea de mi aplicación es **gestionar la vida del usuario** de una manera:
+
+<br>
+<br>
 
 - **Rápida**
 - **Sencilla**

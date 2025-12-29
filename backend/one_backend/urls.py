@@ -10,6 +10,8 @@ from spaces.views import SpaceViewSet
 from projects.views import ProjectViewSet
 from tasks.views import TaskViewSet
 from habits.views import HabitViewSet, HabitLogViewSet
+from finanzas.views import GastoViewSet, PresupuestoViewSet
+from horarios.views import ClaseViewSet
 
 from accounts.views import RegisterView, LoginView, StreakView, UserViewSet, UserMeView
 
@@ -20,6 +22,9 @@ router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'tasks', TaskViewSet, basename='task')
 router.register(r'habits', HabitViewSet, basename='habit')
 router.register(r'habit-logs', HabitLogViewSet, basename='habit-log')
+router.register(r'gastos', GastoViewSet, basename='gasto')
+router.register(r'presupuestos', PresupuestoViewSet, basename='presupuesto')
+router.register(r'clases', ClaseViewSet, basename='clase')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capacidad | ONE</title>
+    <title>Horario | ONE</title>
     <link rel="stylesheet" href="../assets/css/base.css">
-    <link rel="stylesheet" href="../assets/css/capacidad.css?v=2">
+    <link rel="stylesheet" href="../assets/css/horario.css?v=1">
     <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../assets/js/icons.js?v=20"></script>
@@ -45,74 +45,41 @@
                     <a href="habitos.html" class="opcion-menu"><i data-app-icon="check-circle"></i> Hábitos</a>
                     <a href="finanzas.html" class="opcion-menu" data-espacios="Personal"><i
                             data-app-icon="bar-chart-dollar"></i> Finanzas</a>
-                    <a href="horario.html" class="opcion-menu" data-espacios="Escuela"><i data-app-icon="agenda"></i>
-                        Horario</a>
+                    <a href="horario.html" class="opcion-menu activo-menu" data-espacios="Escuela"><i
+                            data-app-icon="agenda"></i> Horario</a>
                     <a href="dashboard.html" class="opcion-menu"><i data-app-icon="bar-chart-3"></i> Dashboard</a>
                 </nav>
 
                 <h2 class="titulo-menu">Herramientas</h2>
                 <div class="menu-inferior">
                     <a href="focus.html" class="opcion-menu"><i data-app-icon="zap"></i> Modo Enfoque</a>
-                    <a href="capacidad.html" class="opcion-menu activo-menu"><i data-app-icon="gauge"></i> Capacidad</a>
+                    <a href="capacidad.html" class="opcion-menu"><i data-app-icon="gauge"></i> Capacidad</a>
                 </div>
             </aside>
 
-            <main class="zona-contenido vista-capacidad">
-                <h1 class="titulo-seccion">Análisis de Capacidad</h1>
-                <p class="subtitulo-seccion"> </p>
-                <section class="config-capacidad">
-                    <label>Mi límite diario productivo:</label>
-                    <div class="input-horas-wrapper">
-                        <input type="number" id="input-horas-productivas" value="6" min="1" max="12"
-                            onchange="calcularCapacidad()">
-                        <span>horas</span>
+            <main class="zona-contenido vista-horario">
+                <section class="cabecera-vista">
+                    <div>
+                        <h1>Horario de clases</h1>
+                        <p>Tu semana escolar, clara y visual.</p>
+                    </div>
+                    <div class="acciones-horario">
+                        <div class="estado-en-vivo" id="estado-clase">Sin clases registradas</div>
+                        <button class="boton-primario" id="btn-nueva-clase">Agregar clase</button>
                     </div>
                 </section>
 
-                <section class="semaforo-container">
-                    <div class="luz rojo" id="luz-rojo">
-                        <i data-lucide="alert-circle"></i>
-                        <span>Sobrecarga</span>
-                    </div>
-                    <div class="luz amarillo" id="luz-amarillo">
-                        <i data-lucide="minus-circle"></i>
-                        <span>Denso</span>
-                    </div>
-                    <div class="luz verde activo" id="luz-verde"> <!-- Activo por defecto -->
-                        <i data-app-icon="check-circle"></i>
-                        <span>Óptimo</span>
-                    </div>
+                <section class="panel-horario">
+                    <div class="horario-grid" id="grid-horario"></div>
+                    <div class="estado-vacio" id="estado-horario"></div>
                 </section>
-
-                <!-- Resultados -->
-                <section class="dashboard-analisis">
-                    <div class="tarjeta-dato">
-                        <h3>Carga estimada hoy</h3>
-                        <div class="dato-grande" id="dato-carga-hoy">0h</div>
-                        <p class="nota-dato">Basado en tareas</p>
-                    </div>
-
-                    <div class="tarjeta-dato">
-                        <h3>Estado</h3>
-                        <div class="dato-grande" id="dato-estado-texto" style="color:var(--color-acento);">Libre</div>
-                        <p class="nota-dato" id="dato-recomendacion">Puedes añadir más tareas.</p>
-                    </div>
-                </section>
-
-                <!-- Predicción Semanal (Mini Heatmap) -->
-                <section class="prediccion-semana">
-                    <h3>Predicción de la Semana</h3>
-                    <div class="grid-dias-capacidad" id="grid-prediccion">
-                    </div>
-                </section>
-
             </main>
         </div>
     </div>
-
     <script src="../assets/js/db.js?v=17"></script>
     <script src="../assets/js/store.js?v=17"></script>
-    <script src="../assets/js/capacidad.js?v=17"></script>
+    <script src="../assets/js/ui.js?v=17"></script>
+    <script src="../assets/js/horario.js?v=1"></script>
     <script src="../assets/js/app.js?v=17"></script>
 </body>
 

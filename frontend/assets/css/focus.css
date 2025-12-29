@@ -37,6 +37,29 @@
     font-size: 0.9rem;
 }
 
+.config-personalizado {
+    display: flex;
+    gap: 10px;
+}
+
+.config-personalizado input {
+    flex: 1;
+    padding: 12px;
+    background: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto-principal);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.texto-ayuda {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--color-texto-tenue);
+}
+
 #select-tarea-focus {
     width: 100%;
     padding: 12px;
@@ -132,6 +155,47 @@
     font-weight: 700;
     color: var(--color-texto-blanco);
     text-shadow: 0 0 20px rgba(66, 145, 85, 0.4);
+}
+
+/* Ajustes de tiempo */
+.ajustes-tiempo {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-ajuste-tiempo {
+    background: var(--color-fondo-panel);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto-blanco);
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-ajuste-tiempo:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ajuste-personalizado {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.ajuste-personalizado input {
+    width: 110px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-borde);
+    background: var(--color-fondo);
+    color: var(--color-texto-principal);
+    font-family: inherit;
 }
 
 /* Controles */

@@ -7,7 +7,8 @@ const Store = {
     KEYS: {
         USUARIO: 'one_usuario',
         DATA: 'one_data', // Nuevo objeto unificado para datos del usuario
-        SESION: 'one_sesion'
+        SESION: 'one_sesion',
+        ESPACIO: 'one_espacio_actual'
     },
 
     // Estado en memoria
@@ -16,7 +17,10 @@ const Store = {
         espacioActual: 'Personal', // 'Personal', 'Escuela', 'Trabajo'
         tareas: [],
         proyectos: [],
-        habitos: []
+        habitos: [],
+        gastos: [],
+        presupuestos: [],
+        clases: []
     },
 
     init: () => {
@@ -43,6 +47,11 @@ const Store = {
     cargarDatos: () => {
         const usuario = localStorage.getItem(Store.KEYS.USUARIO);
         const data = localStorage.getItem(Store.KEYS.DATA);
+        const espacioGuardado = localStorage.getItem(Store.KEYS.ESPACIO);
+
+        if (espacioGuardado && ['Personal', 'Escuela', 'Trabajo'].includes(espacioGuardado)) {
+            Store.state.espacioActual = espacioGuardado;
+        }
 
         if (usuario) Store.guardarUsuario(JSON.parse(usuario));
 
@@ -64,6 +73,18 @@ const Store = {
                     if (h && !h.owner_email) return { ...h, owner_email: currentUserEmail };
                     return h;
                 });
+                const gastosConOwner = (parsed.gastos || []).map(g => {
+                    if (g && !g.owner_email) return { ...g, owner_email: currentUserEmail };
+                    return g;
+                });
+                const presupuestosConOwner = (parsed.presupuestos || []).map(p => {
+                    if (p && !p.owner_email) return { ...p, owner_email: currentUserEmail };
+                    return p;
+                });
+                const clasesConOwner = (parsed.clases || []).map(c => {
+                    if (c && !c.owner_email) return { ...c, owner_email: currentUserEmail };
+                    return c;
+                });
 
                 Store.state.tareas = Store.deduplicarPorId(tareasConOwner.filter(t => t.owner_email === currentUserEmail));
                 Store.state.proyectos = Store.deduplicarPorId(proyectosConOwner.filter(p => p.owner_email === currentUserEmail));
@@ -76,11 +97,17 @@ const Store = {
                         }
                         return h;
                     }));
+                Store.state.gastos = Store.deduplicarPorId(gastosConOwner.filter(g => g.owner_email === currentUserEmail));
+                Store.state.presupuestos = Store.deduplicarPorId(presupuestosConOwner.filter(p => p.owner_email === currentUserEmail));
+                Store.state.clases = Store.deduplicarPorId(clasesConOwner.filter(c => c.owner_email === currentUserEmail));
             } else {
                 // Respaldo si no hay usuario logueado
                 Store.state.tareas = [];
                 Store.state.proyectos = [];
                 Store.state.habitos = [];
+                Store.state.gastos = [];
+                Store.state.presupuestos = [];
+                Store.state.clases = [];
             }
         } else {
             Store.seedData();
@@ -96,11 +123,17 @@ const Store = {
         Store.state.tareas = Store.deduplicarPorId(Store.state.tareas);
         Store.state.proyectos = Store.deduplicarPorId(Store.state.proyectos);
         Store.state.habitos = Store.deduplicarPorId(Store.state.habitos);
+        Store.state.gastos = Store.deduplicarPorId(Store.state.gastos);
+        Store.state.presupuestos = Store.deduplicarPorId(Store.state.presupuestos);
+        Store.state.clases = Store.deduplicarPorId(Store.state.clases);
 
         const data = {
             tareas: Store.state.tareas,
             proyectos: Store.state.proyectos,
-            habitos: Store.state.habitos
+            habitos: Store.state.habitos,
+            gastos: Store.state.gastos,
+            presupuestos: Store.state.presupuestos,
+            clases: Store.state.clases
         };
         localStorage.setItem(Store.KEYS.DATA, JSON.stringify(data));
     },
@@ -160,7 +193,9 @@ const Store = {
 
     // --- ESPACIOS ---
     setEspacioActual: (espacio) => {
+        if (!['Personal', 'Escuela', 'Trabajo'].includes(espacio)) return;
         Store.state.espacioActual = espacio;
+        localStorage.setItem(Store.KEYS.ESPACIO, espacio);
         // Disparar evento de cambio para que la UI se actualice
         document.dispatchEvent(new CustomEvent('cambio-espacio', { detail: espacio }));
     },
@@ -300,6 +335,182 @@ const Store = {
         Store.guardarEstado();
     },
 
+    // --- FINANZAS ---
+    obtenerGastos: () => {
+        const gastos = Store.deduplicarPorId(Store.state.gastos);
+        const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        return gastos.filter(g => {
+            if (currentUserEmail && g.owner_email && g.owner_email !== currentUserEmail) return false;
+            const espacio = g.espacio || g.espacio_nombre;
+            return espacio === Store.state.espacioActual;
+        });
+    },
+
+    agregarGasto: (gasto) => {
+        const montoNum = Number(gasto.monto);
+        const fechaVal = gasto.fecha || Store.fechaIsoLocal(new Date());
+        const nuevoGasto = {
+            id: Store.generarId(),
+            espacio: Store.state.espacioActual,
+            owner_email: Store.state.usuario ? Store.state.usuario.email : null,
+            descripcion: gasto.descripcion,
+            categoria: gasto.categoria || '',
+            fecha: fechaVal,
+            monto: Number.isNaN(montoNum) ? 0 : montoNum
+        };
+        Store.state.gastos.push(nuevoGasto);
+        Store.guardarEstado();
+        if (typeof DBManager !== 'undefined') {
+            DBManager.save('gastos', nuevoGasto);
+        }
+        return nuevoGasto;
+    },
+
+    actualizarGasto: (id, cambios) => {
+        const index = Store.state.gastos.findIndex(g => String(g.id) === String(id));
+        if (index !== -1) {
+            Store.state.gastos[index] = { ...Store.state.gastos[index], ...cambios };
+            Store.guardarEstado();
+            if (typeof DBManager !== 'undefined') {
+                DBManager.save('gastos', Store.state.gastos[index]);
+            }
+            return Store.state.gastos[index];
+        }
+        return null;
+    },
+
+    eliminarGasto: (id) => {
+        const gasto = Store.state.gastos.find(g => String(g.id) === String(id));
+        const targetId = gasto ? gasto.id : id;
+        Store.state.gastos = Store.state.gastos.filter(g => String(g.id) !== String(id));
+        Store.guardarEstado();
+        if (typeof DBManager !== 'undefined') {
+            DBManager.delete('gastos', targetId);
+        }
+    },
+
+    obtenerPresupuestos: () => {
+        const presupuestos = Store.deduplicarPorId(Store.state.presupuestos);
+        const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        return presupuestos.filter(p => {
+            if (currentUserEmail && p.owner_email && p.owner_email !== currentUserEmail) return false;
+            const espacio = p.espacio || p.espacio_nombre;
+            return espacio === Store.state.espacioActual;
+        });
+    },
+
+    obtenerPresupuestoMensual: (mes, anio) => {
+        const mesNum = Number(mes);
+        const anioNum = Number(anio);
+        if (Number.isNaN(mesNum) || Number.isNaN(anioNum)) return null;
+
+        const candidatos = Store.obtenerPresupuestos().filter(p => {
+            return Number(p.mes) === mesNum && Number(p.anio) === anioNum;
+        });
+        if (candidatos.length === 0) return null;
+
+        const ordenados = candidatos.slice().sort((a, b) => {
+            const fechaA = new Date(a.lastModified || a.updated_at || 0).getTime();
+            const fechaB = new Date(b.lastModified || b.updated_at || 0).getTime();
+            return fechaA - fechaB;
+        });
+        return ordenados[ordenados.length - 1];
+    },
+
+    definirPresupuestoMensual: (mes, anio, monto) => {
+        const mesNum = Number(mes);
+        const anioNum = Number(anio);
+        const montoNum = Number(monto);
+        if (Number.isNaN(mesNum) || Number.isNaN(anioNum) || Number.isNaN(montoNum)) return null;
+
+        const espacio = Store.state.espacioActual;
+        const ownerEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        const existente = Store.state.presupuestos.find(p => {
+            const espacioPresupuesto = p.espacio || p.espacio_nombre;
+            if (ownerEmail && p.owner_email && p.owner_email !== ownerEmail) return false;
+            return Number(p.mes) === mesNum && Number(p.anio) === anioNum && espacioPresupuesto === espacio;
+        });
+
+        if (existente) {
+            existente.monto = montoNum;
+            Store.guardarEstado();
+            if (typeof DBManager !== 'undefined') {
+                DBManager.save('presupuestos', existente);
+            }
+            return existente;
+        }
+
+        const nuevoPresupuesto = {
+            id: Store.generarId(),
+            mes: mesNum,
+            anio: anioNum,
+            monto: montoNum,
+            espacio: espacio,
+            owner_email: ownerEmail
+        };
+        Store.state.presupuestos.push(nuevoPresupuesto);
+        Store.guardarEstado();
+        if (typeof DBManager !== 'undefined') {
+            DBManager.save('presupuestos', nuevoPresupuesto);
+        }
+        return nuevoPresupuesto;
+    },
+
+    // --- HORARIO ---
+    obtenerClases: () => {
+        const clases = Store.deduplicarPorId(Store.state.clases);
+        const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
+        return clases.filter(c => {
+            if (currentUserEmail && c.owner_email && c.owner_email !== currentUserEmail) return false;
+            const espacio = c.espacio || c.espacio_nombre;
+            return espacio === Store.state.espacioActual;
+        });
+    },
+
+    agregarClase: (clase) => {
+        const nuevaClase = {
+            id: Store.generarId(),
+            espacio: Store.state.espacioActual,
+            owner_email: Store.state.usuario ? Store.state.usuario.email : null,
+            materia: clase.materia,
+            profesor: clase.profesor || '',
+            salon: clase.salon || '',
+            diaSemana: clase.diaSemana,
+            horaInicio: clase.horaInicio,
+            horaFin: clase.horaFin,
+            color: clase.color || '#429155'
+        };
+        Store.state.clases.push(nuevaClase);
+        Store.guardarEstado();
+        if (typeof DBManager !== 'undefined') {
+            DBManager.save('clases', nuevaClase);
+        }
+        return nuevaClase;
+    },
+
+    actualizarClase: (id, cambios) => {
+        const index = Store.state.clases.findIndex(c => String(c.id) === String(id));
+        if (index !== -1) {
+            Store.state.clases[index] = { ...Store.state.clases[index], ...cambios };
+            Store.guardarEstado();
+            if (typeof DBManager !== 'undefined') {
+                DBManager.save('clases', Store.state.clases[index]);
+            }
+            return Store.state.clases[index];
+        }
+        return null;
+    },
+
+    eliminarClase: (id) => {
+        const clase = Store.state.clases.find(c => String(c.id) === String(id));
+        const targetId = clase ? clase.id : id;
+        Store.state.clases = Store.state.clases.filter(c => String(c.id) !== String(id));
+        Store.guardarEstado();
+        if (typeof DBManager !== 'undefined') {
+            DBManager.delete('clases', targetId);
+        }
+    },
+
     // --- SEED DATA (Datos de prueba dinámicos) ---
     // --- SEED DATA (Datos de prueba dinámicos) ---
     seedData: () => {
@@ -334,6 +545,22 @@ const Store = {
             Store.state.habitos = [
                 { id: 301, nombre: "Tomar Agua (2L)", registros: { [hoyIso]: { completado: true } } },
                 { id: 302, nombre: "Leer 20 mins", registros: { [ayerIso]: { completado: true } } }
+            ];
+
+            Store.state.gastos = [
+                { id: 401, descripcion: "Café", categoria: "Comida", fecha: hoyIso, monto: 45, espacio: "Personal" },
+                { id: 402, descripcion: "Uber", categoria: "Transporte", fecha: hoyIso, monto: 120, espacio: "Personal" },
+                { id: 403, descripcion: "Libreta", categoria: "Escuela", fecha: ayerIso, monto: 80, espacio: "Personal" }
+            ];
+
+            Store.state.presupuestos = [
+                { id: 501, mes: hoy.getMonth() + 1, anio: hoy.getFullYear(), monto: 3000, espacio: "Personal" }
+            ];
+
+            Store.state.clases = [
+                { id: 601, materia: "Matemáticas", profesor: "Dra. Ramos", salon: "201", diaSemana: 0, horaInicio: "08:00", horaFin: "09:30", color: "#3B82F6", espacio: "Escuela" },
+                { id: 602, materia: "Programación", profesor: "Ing. Salas", salon: "Lab 3", diaSemana: 2, horaInicio: "10:00", horaFin: "11:30", color: "#429155", espacio: "Escuela" },
+                { id: 603, materia: "Historia", profesor: "Mtra. López", salon: "105", diaSemana: 4, horaInicio: "12:00", horaFin: "13:00", color: "#F59E0B", espacio: "Escuela" }
             ];
 
             Store.guardarEstado();

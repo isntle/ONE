@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="../assets/css/focus.css?v=6">
     <link rel="icon" href="../assets/img/ONE.ico" type="image/x-icon">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="../assets/js/icons.js"></script>
+    <script src="../assets/js/icons.js?v=20"></script>
 </head>
 
 <body>
@@ -43,6 +43,10 @@
                     <a href="semana.html" class="opcion-menu"><i data-app-icon="calendar"></i> Semana</a>
                     <a href="proyectos.html" class="opcion-menu"><i data-app-icon="layout-grid"></i> Proyectos</a>
                     <a href="habitos.html" class="opcion-menu"><i data-app-icon="check-circle"></i> Hábitos</a>
+                    <a href="finanzas.html" class="opcion-menu" data-espacios="Personal"><i
+                            data-app-icon="bar-chart-dollar"></i> Finanzas</a>
+                    <a href="horario.html" class="opcion-menu" data-espacios="Escuela"><i data-app-icon="agenda"></i>
+                        Horario</a>
                     <a href="dashboard.html" class="opcion-menu"><i data-app-icon="bar-chart-3"></i> Dashboard</a>
                 </nav>
 
@@ -73,6 +77,15 @@
                         </div>
                     </div>
 
+                    <div class="grupo-config">
+                        <label>Tiempo personalizado</label>
+                        <div class="config-personalizado">
+                            <input type="number" id="input-tiempo-personalizado" placeholder="Minutos" min="1">
+                            <button class="boton-secundario" id="btn-aplicar-tiempo">Aplicar</button>
+                        </div>
+                        <span class="texto-ayuda">Enter para aplicar tu tiempo</span>
+                    </div>
+
                     <button class="boton-primario btn-iniciar" onclick="iniciarFocus()">
                         <i data-lucide="play"></i> Iniciar Sesión
                     </button>
@@ -93,6 +106,14 @@
                                 fill="transparent" r="140" cx="150" cy="150" />
                         </svg>
                         <div class="tiempo-central" id="display-tiempo">25:00</div>
+                    </div>
+
+                    <div class="ajustes-tiempo">
+                        <button class="btn-ajuste-tiempo" data-minutos="5">+5 min</button>
+                        <div class="ajuste-personalizado">
+                            <input type="number" id="input-tiempo-extra" placeholder="+ min" min="1">
+                            <button class="btn-ajuste-tiempo" id="btn-agregar-tiempo">Agregar</button>
+                        </div>
                     </div>
 
                     <div class="controles-sesion">

@@ -1,0 +1,355 @@
+/* 
+ * horario.css
+ * Estilos para la vista de Horario de Clases
+ */
+
+.vista-horario {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.cabecera-vista {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.cabecera-vista h1 {
+    font-size: 1.7rem;
+    color: var(--color-texto-blanco);
+    margin-bottom: 4px;
+}
+
+.cabecera-vista p {
+    font-size: 0.95rem;
+    color: var(--color-texto-secundario);
+}
+
+.acciones-horario {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.estado-en-vivo {
+    background: var(--color-fondo-tarjeta);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: var(--color-texto-blanco);
+    font-size: 0.9rem;
+    min-width: 220px;
+    text-align: right;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.panel-horario {
+    background: var(--color-fondo-tarjeta);
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.panel-header h2 {
+    font-size: 1.1rem;
+    color: var(--color-texto-blanco);
+}
+
+.panel-header p {
+    font-size: 0.85rem;
+    color: var(--color-texto-tenue);
+}
+
+.formulario-clase {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: center;
+}
+
+.formulario-clase input,
+.formulario-clase select {
+    background: var(--color-fondo-bloque);
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--color-texto-blanco);
+    font-family: inherit;
+}
+
+.horario-grid {
+    display: grid;
+    grid-template-columns: 90px repeat(5, minmax(160px, 1fr));
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.columna-horas {
+    display: flex;
+    flex-direction: column;
+}
+
+.cabecera-horas,
+.cabecera-dia {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-texto-tenue);
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.hora-item {
+    height: var(--altura-hora, 56px);
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    color: var(--color-texto-secundario);
+}
+
+.columna-dia {
+    background: var(--color-fondo-panel);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    overflow: hidden;
+    min-width: 160px;
+}
+
+.dia-cuerpo {
+    position: relative;
+    height: var(--altura-total, 560px);
+    background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.05) 0px,
+        rgba(255, 255, 255, 0.05) 1px,
+        transparent 1px,
+        transparent var(--altura-hora, 56px)
+    );
+}
+
+.bloque-clase {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    border-radius: 12px;
+    padding: 8px 10px;
+    color: #fff;
+    background: var(--color-acento);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bloque-clase.en-vivo {
+    outline: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 0 2px rgba(66, 145, 85, 0.4), 0 10px 20px rgba(0, 0, 0, 0.5);
+}
+
+.bloque-clase h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.bloque-clase p {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.acciones-clase {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-eliminar-clase {
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 4px 6px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-eliminar-clase:hover {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.estado-vacio {
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px dashed var(--color-borde);
+    color: var(--color-texto-tenue);
+    text-align: center;
+}
+
+/* Modal de clase */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 6, 8, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-clase {
+    background: var(--color-fondo-panel);
+    width: 420px;
+    max-width: 92%;
+    border-radius: 16px;
+    border: 1px solid var(--color-borde);
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    color: var(--color-texto-blanco);
+    font-size: 1.2rem;
+}
+
+.modal-cerrar {
+    background: none;
+    border: none;
+    color: var(--color-texto-tenue);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-campo {
+    margin-bottom: 16px;
+}
+
+.modal-campo label {
+    display: block;
+    color: var(--color-texto-secundario);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.modal-campo input,
+.modal-campo select {
+    width: 100%;
+    background: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto-principal);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.modal-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-cancelar {
+    background: transparent;
+    color: var(--color-texto-tenue);
+    border: 1px solid var(--color-borde);
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-guardar {
+    background: var(--color-acento);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.color-picker {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.color-option {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.15);
+}
+
+.color-option.seleccionado {
+    border-color: white;
+    box-shadow: 0 0 0 2px var(--color-fondo-panel), 0 0 0 4px currentColor;
+    transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+    .cabecera-vista {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .estado-en-vivo {
+        text-align: left;
+    }
+
+    .acciones-horario {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 720px) {
+    .formulario-clase {
+        grid-template-columns: 1fr;
+    }
+
+    .horario-grid {
+        grid-template-columns: 80px repeat(5, minmax(140px, 1fr));
+    }
+}

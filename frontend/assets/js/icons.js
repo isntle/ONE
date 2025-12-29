@@ -12,6 +12,7 @@ const IconMapping = {
     'layout-grid': 'layout-9.svg',
     'check-circle': 'check-circle-1.svg',
     'bar-chart-3': 'pie-chart-2.svg',
+    'pie-chart': 'pie-chart-2.svg',
     'zap': 'bolt-2.svg',
     'gauge': 'gauge-1.svg',
     'sparkles': 'bulb-2.svg',
@@ -31,7 +32,9 @@ const IconMapping = {
     'bold': 'bold.svg',
     'list': 'menu-hamburger-1.svg',
     'align-center': 'align-text-center.svg',
-    'link': 'link-2-angular-right.svg'
+    'link': 'link-2-angular-right.svg',
+    'bar-chart-dollar': 'bar-chart-dollar.svg',
+    'agenda': 'agenda.svg'
 };
 
 const Icons = {

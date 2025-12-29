@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'projects',
     'tasks',
     'habits',
+    'finanzas',
+    'horarios',
     'sync',
 ]
 

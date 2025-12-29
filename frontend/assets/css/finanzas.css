@@ -1,0 +1,272 @@
+/* 
+ * finanzas.css
+ * Estilos para la vista de Finanzas personales
+ */
+
+.vista-finanzas {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.cabecera-vista {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.cabecera-vista h1 {
+    font-size: 1.7rem;
+    color: var(--color-texto-blanco);
+    margin-bottom: 4px;
+}
+
+.cabecera-vista p {
+    font-size: 0.95rem;
+    color: var(--color-texto-secundario);
+}
+
+.filtro-mes {
+    background: var(--color-fondo-tarjeta);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 160px;
+}
+
+.filtro-mes label {
+    font-size: 0.75rem;
+    color: var(--color-texto-tenue);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.filtro-mes input {
+    background: transparent;
+    border: none;
+    color: var(--color-texto-blanco);
+    font-family: inherit;
+}
+
+.resumen-finanzas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.tarjeta-resumen {
+    background: var(--color-fondo-tarjeta);
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+}
+
+.tarjeta-resumen h3 {
+    font-size: 0.95rem;
+    color: var(--color-texto-secundario);
+    margin-bottom: 8px;
+}
+
+.resumen-valor {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-texto-blanco);
+}
+
+.resumen-input {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.resumen-input input {
+    background: var(--color-fondo-bloque);
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 8px 10px;
+    color: var(--color-texto-blanco);
+    font-family: inherit;
+}
+
+.texto-ayuda {
+    font-size: 0.75rem;
+    color: var(--color-texto-tenue);
+}
+
+.nota-resumen {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--color-texto-tenue);
+}
+
+.panel-registro,
+.panel-gastos,
+.panel-grafica {
+    background: var(--color-fondo-tarjeta);
+    border: 1px solid var(--color-borde);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.panel-header h2 {
+    font-size: 1.1rem;
+    color: var(--color-texto-blanco);
+}
+
+.panel-header p {
+    font-size: 0.85rem;
+    color: var(--color-texto-tenue);
+}
+
+.formulario-gasto {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    align-items: center;
+}
+
+.formulario-gasto input {
+    background: var(--color-fondo-bloque);
+    border: 1px solid var(--color-borde);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--color-texto-blanco);
+    font-family: inherit;
+}
+
+.grid-finanzas {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 16px;
+}
+
+.lista-gastos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.item-gasto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--color-fondo-bloque);
+    border: 1px solid var(--color-borde);
+    border-radius: 12px;
+    padding: 10px 12px;
+    gap: 12px;
+}
+
+.item-gasto h4 {
+    font-size: 0.95rem;
+    color: var(--color-texto-blanco);
+    margin-bottom: 4px;
+}
+
+.item-gasto .meta {
+    font-size: 0.8rem;
+    color: var(--color-texto-secundario);
+}
+
+.monto-gasto {
+    font-weight: 700;
+    color: var(--color-texto-blanco);
+    font-size: 1rem;
+}
+
+.acciones-gasto {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-eliminar-gasto {
+    background: transparent;
+    border: 1px solid var(--color-borde);
+    color: var(--color-texto-secundario);
+    padding: 4px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn-eliminar-gasto:hover {
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #EF4444;
+}
+
+.contenedor-grafica {
+    height: 260px;
+    position: relative;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contenedor-grafica canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.estado-grafica {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-texto-tenue);
+    font-size: 0.9rem;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(14, 16, 23, 0.4) 0%, rgba(14, 16, 23, 0.85) 70%);
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.estado-grafica.activo {
+    opacity: 1;
+}
+
+.estado-vacio {
+    padding: 20px;
+    text-align: center;
+    color: var(--color-texto-tenue);
+    border: 1px dashed var(--color-borde);
+    border-radius: 12px;
+    margin-top: 12px;
+}
+
+@media (max-width: 1024px) {
+    .grid-finanzas {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .cabecera-vista {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .formulario-gasto {
+        grid-template-columns: 1fr;
+    }
+}

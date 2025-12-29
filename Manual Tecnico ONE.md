@@ -42,10 +42,6 @@ Mi intención con el manual es que cualquier persona pueda:
 La idea de la aplicación que quise construir es una que permita **gestionar la vida de los usuarios**, sin depender de qué tipo de usuario es: ya sea un estudiante, una persona normal o una persona trabajadora.
 
 La idea de mi aplicación es **gestionar la vida del usuario** de una manera:
-
-<br>
-<br>
-
 - **Rápida**
 - **Sencilla**
 - **Fácil de adoptar** (algo que la gente pueda usar sin sentirse abrumada)
@@ -372,6 +368,8 @@ Este cuadro sirve para ubicar rápido: “estoy en X página → se ejecuta Y JS
 | detalle-proyecto.html | base.css, detalle-proyecto.css, proyectos.css | icons.js, db.js, store.js, ui.js, detalle-proyecto.js, app.js, app.js |
 | focus.html | base.css, focus.css | icons.js, db.js, store.js, ui.js, focus.js, app.js |
 | habitos.html | base.css, habitos.css | icons.js, db.js, store.js, ui.js, habitos.js, app.js |
+| finanzas.html | base.css, finanzas.css | icons.js, db.js, store.js, ui.js, finanzas.js, app.js |
+| horario.html | base.css, horario.css | icons.js, db.js, store.js, ui.js, horario.js, app.js |
 | login.html | base.css, auth.css | icons.js, db.js, store.js, ui.js, auth.js, app.js |
 | notificaciones.html | base.css | icons.js, store.js, app.js |
 | perfil.html | base.css, auth.css | icons.js, store.js, app.js |
@@ -393,6 +391,8 @@ En el frontend, los CSS principales son:
 - `detalle-proyecto.css`
 - `focus.css`
 - `habitos.css`
+- `finanzas.css`
+- `horario.css`
 - `proyectos.css`
 - `semana.css`
 
@@ -414,6 +414,8 @@ Estos archivos aparecen en muchas páginas porque son el “núcleo”:
 - `js/detalle-proyecto.js`
 - `js/focus.js`
 - `js/habitos.js`
+- `js/finanzas.js`
+- `js/horario.js`
 - `js/icons.js`
 - `js/proyectos.js`
 - `js/semana.js`
@@ -434,6 +436,9 @@ Este archivo concentra el estado “central” del frontend.
 - `tareas`: lista de tareas
 - `proyectos`: lista de proyectos
 - `habitos`: lista de hábitos
+- `gastos`: lista de gastos
+- `presupuestos`: lista de presupuestos mensuales
+- `clases`: lista de clases del horario
 - `habitLogs`: registros diarios de hábitos
 - `espacios`: los espacios base (Personal/Escuela/Trabajo)
 - `config`: configuración (por ejemplo si se usa backend o solo local)
@@ -491,6 +496,9 @@ Stores:
 - `projects`
 - `habitos`
 - `habitLogs`
+- `gastos`
+- `presupuestos`
+- `clases`
 - `spaces`
 - `users`
 - `outbox`
@@ -595,14 +603,26 @@ Aquí describo la intención de cada pantalla.
 - Calcula capacidad en base a carga de tareas / planificación.
 - Lógica: `capacidad.js`
 
-#### 6.7.10 `pages/perfil.html`
+#### 6.7.10 `pages/finanzas.html`
+- Módulo de finanzas personales.
+- Permite registrar gastos diarios y definir presupuesto mensual.
+- Incluye gráfica de distribución por categoría.
+- Lógica: `finanzas.js`
+
+#### 6.7.11 `pages/horario.html`
+- Horario visual de clases (Lunes a Viernes).
+- Permite crear bloques de clase con materia, horas, profesor y salón.
+- Incluye indicador “en vivo”.
+- Lógica: `horario.js`
+
+#### 6.7.12 `pages/perfil.html`
 - Perfil del usuario:
   - Racha (streak)
   - Minutos de foco
   - Energía (energy_level)
 - Lógica base: `app.js` + `Store`
 
-#### 6.7.11 `pages/notificaciones.html`
+#### 6.7.13 `pages/notificaciones.html`
 - Página de notificaciones (estructura lista para crecer).
 
 ---
@@ -641,6 +661,8 @@ El backend existe para:
   - tareas
   - proyectos
   - hábitos
+  - finanzas (gastos + presupuestos)
+  - horario (clases)
   - espacios
 - Manejar autenticación/sesión del lado servidor (cuando se decide usarla).
 
@@ -665,6 +687,8 @@ Archivo: `backend/requirements.txt`
 - `backend/projects/` → proyectos  
 - `backend/tasks/` → tareas  
 - `backend/habits/` → hábitos + logs  
+- `backend/finanzas/` → gastos + presupuesto mensual  
+- `backend/horarios/` → horario de clases  
 - `backend/sync/` → base para sincronización (por ahora simple)  
 - `backend/db.sqlite3` → base de datos local (desarrollo)
 
@@ -698,6 +722,9 @@ Base: `/api/`
 | tasks | TaskViewSet |
 | habits | HabitViewSet |
 | habit-logs | HabitLogViewSet |
+| gastos | GastoViewSet |
+| presupuestos | PresupuestoViewSet |
+| clases | ClaseViewSet |
 
 
 Eso crea endpoints tipo:
@@ -708,6 +735,9 @@ Eso crea endpoints tipo:
 - `/api/spaces/`
 - `/api/habits/`
 - `/api/habit-logs/`
+- `/api/gastos/`
+- `/api/presupuestos/`
+- `/api/clases/`
 
 #### 7.5.2 Endpoints extra (acciones específicas)
 
@@ -778,6 +808,34 @@ Campos:
   - `habit`
   - `date`
   - `done`
+
+#### 7.6.6 Gasto (finanzas)
+
+- `descripcion`
+- `categoria`
+- `fecha`
+- `monto`
+- `space`
+- `user`
+
+#### 7.6.7 Presupuesto (finanzas)
+
+- `mes`
+- `anio`
+- `monto`
+- `space`
+- `user`
+
+#### 7.6.8 Clase (horarios)
+
+- `materia`
+- `profesor`
+- `salon`
+- `dia_semana`
+- `hora_inicio`, `hora_fin`
+- `color`
+- `space`
+- `user`
 
 ---
 
@@ -970,6 +1028,28 @@ one/
       serializers.py
       tests.py
       views.py
+    finanzas/
+      migrations/
+        0001_initial.py
+        __init__.py
+      __init__.py
+      admin.py
+      apps.py
+      models.py
+      serializers.py
+      tests.py
+      views.py
+    horarios/
+      migrations/
+        0001_initial.py
+        __init__.py
+      __init__.py
+      admin.py
+      apps.py
+      models.py
+      serializers.py
+      tests.py
+      views.py
     one_backend/
       __init__.py
       asgi.py
@@ -1035,6 +1115,8 @@ one/
         detalle-proyecto.css
         focus.css
         habitos.css
+        finanzas.css
+        horario.css
         proyectos.css
         semana.css
       icons/
@@ -1067,7 +1149,6 @@ one/
       img/
         ONE.ico
       js/
-        ONE_Merida de Leon Luis Ernesto.code-workspace
         app.js
         auth.js
         capacidad.js
@@ -1076,6 +1157,8 @@ one/
         detalle-proyecto.js
         focus.js
         habitos.js
+        finanzas.js
+        horario.js
         icons.js
         proyectos.js
         semana.js
@@ -1087,6 +1170,8 @@ one/
       detalle-proyecto.html
       focus.html
       habitos.html
+      finanzas.html
+      horario.html
       login.html
       notificaciones.html
       perfil.html
@@ -1104,6 +1189,8 @@ Páginas:
 - `/pages/detalle-proyecto.html`
 - `/pages/focus.html`
 - `/pages/habitos.html`
+- `/pages/finanzas.html`
+- `/pages/horario.html`
 - `/pages/login.html`
 - `/pages/notificaciones.html`
 - `/pages/perfil.html`
@@ -1120,6 +1207,8 @@ CSS:
 - `/assets/css/detalle-proyecto.css`
 - `/assets/css/focus.css`
 - `/assets/css/habitos.css`
+- `/assets/css/finanzas.css`
+- `/assets/css/horario.css`
 - `/assets/css/proyectos.css`
 - `/assets/css/semana.css`
 
@@ -1133,6 +1222,8 @@ JS:
 - `/assets/js/detalle-proyecto.js`
 - `/assets/js/focus.js`
 - `/assets/js/habitos.js`
+- `/assets/js/finanzas.js`
+- `/assets/js/horario.js`
 - `/assets/js/icons.js`
 - `/assets/js/proyectos.js`
 - `/assets/js/semana.js`
@@ -1169,6 +1260,24 @@ Audio:
 - `backend/habits/serializers.py`
 - `backend/habits/tests.py`
 - `backend/habits/views.py`
+- `backend/finanzas/__init__.py`
+- `backend/finanzas/admin.py`
+- `backend/finanzas/apps.py`
+- `backend/finanzas/migrations/0001_initial.py`
+- `backend/finanzas/migrations/__init__.py`
+- `backend/finanzas/models.py`
+- `backend/finanzas/serializers.py`
+- `backend/finanzas/tests.py`
+- `backend/finanzas/views.py`
+- `backend/horarios/__init__.py`
+- `backend/horarios/admin.py`
+- `backend/horarios/apps.py`
+- `backend/horarios/migrations/0001_initial.py`
+- `backend/horarios/migrations/__init__.py`
+- `backend/horarios/models.py`
+- `backend/horarios/serializers.py`
+- `backend/horarios/tests.py`
+- `backend/horarios/views.py`
 - `backend/manage.py`
 - `backend/one_backend/__init__.py`
 - `backend/one_backend/asgi.py`
@@ -1225,4 +1334,3 @@ Audio:
 - **CSRF**: protección para evitar que un sitio ajeno haga acciones como si fueras tú.
 
 ---
-

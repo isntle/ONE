@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'ONE_DB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 let db = null;
 
 // Inicializar IndexedDB
@@ -52,6 +52,29 @@ const DBManager = {
                     const logsStore = db.createObjectStore('habitLogs', { keyPath: 'id' });
                     logsStore.createIndex('habit_id', 'habit_id', { unique: false });
                     logsStore.createIndex('date', 'date', { unique: false });
+                }
+
+                if (!db.objectStoreNames.contains('gastos')) {
+                    const gastosStore = db.createObjectStore('gastos', { keyPath: 'id' });
+                    gastosStore.createIndex('fecha', 'fecha', { unique: false });
+                    gastosStore.createIndex('categoria', 'categoria', { unique: false });
+                    gastosStore.createIndex('espacio', 'espacio', { unique: false });
+                    gastosStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+                }
+
+                if (!db.objectStoreNames.contains('presupuestos')) {
+                    const presupuestosStore = db.createObjectStore('presupuestos', { keyPath: 'id' });
+                    presupuestosStore.createIndex('mes', 'mes', { unique: false });
+                    presupuestosStore.createIndex('anio', 'anio', { unique: false });
+                    presupuestosStore.createIndex('espacio', 'espacio', { unique: false });
+                    presupuestosStore.createIndex('syncStatus', 'syncStatus', { unique: false });
+                }
+
+                if (!db.objectStoreNames.contains('clases')) {
+                    const clasesStore = db.createObjectStore('clases', { keyPath: 'id' });
+                    clasesStore.createIndex('diaSemana', 'diaSemana', { unique: false });
+                    clasesStore.createIndex('espacio', 'espacio', { unique: false });
+                    clasesStore.createIndex('syncStatus', 'syncStatus', { unique: false });
                 }
 
                 // Buzón de salida para cambios sin internet
@@ -149,6 +172,38 @@ const DBManager = {
             delete payload.fechaRegistro;
         }
 
+        if (type === 'gastos') {
+            if (payload.fecha === '') payload.fecha = null;
+            if (payload.monto !== undefined && payload.monto !== null) {
+                const montoNum = Number(payload.monto);
+                if (!Number.isNaN(montoNum)) payload.monto = montoNum;
+            }
+        }
+
+        if (type === 'presupuestos') {
+            if (payload.mes !== undefined && payload.mes !== null) {
+                const mesNum = Number(payload.mes);
+                if (!Number.isNaN(mesNum)) payload.mes = mesNum;
+            }
+            if (payload.anio !== undefined && payload.anio !== null) {
+                const anioNum = Number(payload.anio);
+                if (!Number.isNaN(anioNum)) payload.anio = anioNum;
+            }
+            if (payload.monto !== undefined && payload.monto !== null) {
+                const montoNum = Number(payload.monto);
+                if (!Number.isNaN(montoNum)) payload.monto = montoNum;
+            }
+        }
+
+        if (type === 'clases') {
+            if (payload.horaInicio === '') payload.horaInicio = null;
+            if (payload.horaFin === '') payload.horaFin = null;
+            if (payload.diaSemana !== undefined && payload.diaSemana !== null) {
+                const diaNum = Number(payload.diaSemana);
+                if (!Number.isNaN(diaNum)) payload.diaSemana = diaNum;
+            }
+        }
+
         return payload;
     },
 
@@ -170,6 +225,36 @@ const DBManager = {
             delete normalized.description;
             if (!normalized.espacio && normalized.espacio_nombre) {
                 normalized.espacio = normalized.espacio_nombre;
+            }
+        }
+
+        if (type === 'gastos') {
+            if (!normalized.espacio && normalized.espacio_nombre) {
+                normalized.espacio = normalized.espacio_nombre;
+            }
+            if (normalized.monto !== undefined && normalized.monto !== null) {
+                const montoNum = Number(normalized.monto);
+                if (!Number.isNaN(montoNum)) normalized.monto = montoNum;
+            }
+        }
+
+        if (type === 'presupuestos') {
+            if (!normalized.espacio && normalized.espacio_nombre) {
+                normalized.espacio = normalized.espacio_nombre;
+            }
+            if (normalized.monto !== undefined && normalized.monto !== null) {
+                const montoNum = Number(normalized.monto);
+                if (!Number.isNaN(montoNum)) normalized.monto = montoNum;
+            }
+        }
+
+        if (type === 'clases') {
+            if (!normalized.espacio && normalized.espacio_nombre) {
+                normalized.espacio = normalized.espacio_nombre;
+            }
+            if (normalized.diaSemana !== undefined && normalized.diaSemana !== null) {
+                const diaNum = Number(normalized.diaSemana);
+                if (!Number.isNaN(diaNum)) normalized.diaSemana = diaNum;
             }
         }
 
@@ -315,7 +400,10 @@ const DBManager = {
             'habitos': '/habits/',
             'habitLogs': '/habit-logs/',
             'users': '/me/',
-            'spaces': '/spaces/'
+            'spaces': '/spaces/',
+            'gastos': '/gastos/',
+            'presupuestos': '/presupuestos/',
+            'clases': '/clases/'
         };
 
         const endpoint = endpoints[operation.type];
@@ -396,8 +484,15 @@ const DBManager = {
 
         console.log("⬇️ Descargando datos del servidor...");
         // Importante: Proyectos antes de Tareas (para que no falten referencias)
-        const types = ['projects', 'tasks', 'habits'];
-        const localTypes = { 'tasks': 'tareas', 'projects': 'proyectos', 'habits': 'habitos' };
+        const types = ['projects', 'tasks', 'habits', 'gastos', 'presupuestos', 'clases'];
+        const localTypes = {
+            'tasks': 'tareas',
+            'projects': 'proyectos',
+            'habits': 'habitos',
+            'gastos': 'gastos',
+            'presupuestos': 'presupuestos',
+            'clases': 'clases'
+        };
 
         for (const type of types) {
             try {
@@ -421,6 +516,9 @@ const DBManager = {
                     if (type === 'tasks') Store.state.tareas = [];
                     if (type === 'projects') Store.state.proyectos = [];
                     if (type === 'habits') Store.state.habitos = []; // La lógica de habits es más compleja por logs, simplificado aquí
+                    if (type === 'gastos') Store.state.gastos = [];
+                    if (type === 'presupuestos') Store.state.presupuestos = [];
+                    if (type === 'clases') Store.state.clases = [];
 
                     for (const item of data) {
                         const normalized = DBManager.normalizeFromBackend(type, item);
@@ -442,12 +540,18 @@ const DBManager = {
         Store.state.tareas = await DBManager.getAll('tareas');
         Store.state.proyectos = await DBManager.getAll('proyectos');
         Store.state.habitos = await DBManager.getAll('habitos');
+        Store.state.gastos = await DBManager.getAll('gastos');
+        Store.state.presupuestos = await DBManager.getAll('presupuestos');
+        Store.state.clases = await DBManager.getAll('clases');
 
         const currentUserEmail = Store.state.usuario ? Store.state.usuario.email : null;
         if (currentUserEmail) {
             Store.state.tareas = Store.deduplicarPorId(Store.state.tareas.filter(t => t.owner_email === currentUserEmail));
             Store.state.proyectos = Store.deduplicarPorId(Store.state.proyectos.filter(p => p.owner_email === currentUserEmail));
             Store.state.habitos = Store.deduplicarPorId(Store.state.habitos.filter(h => h.owner_email === currentUserEmail));
+            Store.state.gastos = Store.deduplicarPorId(Store.state.gastos.filter(g => g.owner_email === currentUserEmail));
+            Store.state.presupuestos = Store.deduplicarPorId(Store.state.presupuestos.filter(p => p.owner_email === currentUserEmail));
+            Store.state.clases = Store.deduplicarPorId(Store.state.clases.filter(c => c.owner_email === currentUserEmail));
         }
         Store.guardarEstado();
         console.log("✅ Datos restaurados del servidor");
@@ -456,7 +560,7 @@ const DBManager = {
     clearAll: async () => {
         if (!db) await DBManager.init();
 
-        const stores = ['tareas', 'proyectos', 'habitos', 'habitLogs', 'outbox', 'users'];
+        const stores = ['tareas', 'proyectos', 'habitos', 'habitLogs', 'gastos', 'presupuestos', 'clases', 'outbox', 'users'];
         const transaction = db.transaction(stores, 'readwrite');
 
         stores.forEach(storeName => {

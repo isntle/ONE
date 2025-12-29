@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     cargarTareasSetup();
     configurarBotonesModo();
+    configurarTiempoPersonalizado();
+    configurarAjustesTiempoSesion();
     Icons.init();
 });
 
@@ -65,10 +67,82 @@ function configurarBotonesModo() {
             btn.classList.add('activo');
 
             const mins = parseInt(btn.dataset.min);
-            tiempoTotal = mins * 60;
-            tiempoRestante = tiempoTotal; // Reset al cambiar modo
+            definirTiempoBase(mins);
         });
     });
+}
+
+function configurarTiempoPersonalizado() {
+    const inputTiempo = document.getElementById('input-tiempo-personalizado');
+    const btnAplicar = document.getElementById('btn-aplicar-tiempo');
+
+    if (!inputTiempo || !btnAplicar) return;
+
+    const aplicar = () => {
+        const minutos = Number(inputTiempo.value);
+        if (Number.isNaN(minutos) || minutos <= 0) {
+            UI.toast('Escribe un tiempo válido', 'error');
+            return;
+        }
+        document.querySelectorAll('.btn-modo').forEach(b => b.classList.remove('activo'));
+        definirTiempoBase(minutos);
+        UI.toast('Tiempo personalizado aplicado', 'success');
+    };
+
+    btnAplicar.addEventListener('click', aplicar);
+    inputTiempo.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            aplicar();
+        }
+    });
+}
+
+function configurarAjustesTiempoSesion() {
+    const btnsRapidos = document.querySelectorAll('.btn-ajuste-tiempo[data-minutos]');
+    const inputExtra = document.getElementById('input-tiempo-extra');
+    const btnAgregar = document.getElementById('btn-agregar-tiempo');
+
+    btnsRapidos.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const minutos = Number(btn.dataset.minutos);
+            if (!Number.isNaN(minutos)) agregarTiempoExtra(minutos);
+        });
+    });
+
+    btnAgregar?.addEventListener('click', () => {
+        if (!inputExtra) return;
+        const minutos = Number(inputExtra.value);
+        if (Number.isNaN(minutos) || minutos <= 0) {
+            UI.toast('Escribe un número válido', 'error');
+            return;
+        }
+        agregarTiempoExtra(minutos);
+        inputExtra.value = '';
+    });
+
+    inputExtra?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            btnAgregar?.click();
+        }
+    });
+}
+
+function definirTiempoBase(minutos) {
+    tiempoTotal = minutos * 60;
+    tiempoRestante = tiempoTotal;
+    actualizarDisplay();
+    setProgress(tiempoRestante);
+}
+
+function agregarTiempoExtra(minutos) {
+    const segundos = Math.round(minutos * 60);
+    tiempoTotal += segundos;
+    tiempoRestante += segundos;
+    actualizarDisplay();
+    setProgress(tiempoRestante);
+    UI.toast(`Se agregaron ${minutos} min`, 'success');
 }
 
 window.iniciarFocus = () => {
@@ -90,14 +164,8 @@ window.iniciarFocus = () => {
         if (t) document.getElementById('titulo-tarea-activa').textContent = t.titulo;
     }
 
-    enPausa = false;
-    actualizarDisplay();
-    timerInterval = setInterval(tick, 1000);
-
-    // Cambiar icono pausa/play
-    const btn = document.getElementById('btn-pausa');
-    btn.innerHTML = '<i data-app-icon="pause"></i>';
-    Icons.init();
+    tiempoRestante = tiempoTotal;
+    iniciarTemporizador();
 
     // Cargar Clima
     cargarClima();
@@ -156,12 +224,12 @@ async function cargarClima() {
 }
 
 function tick() {
-    if (!enPausa && tiempoRestante > 0) {
+    if (enPausa) return;
+    if (tiempoRestante > 0) {
         tiempoRestante--;
         actualizarDisplay();
         setProgress(tiempoRestante);
-    } else if (tiempoRestante === 0) {
-        completarSesion();
+        if (tiempoRestante === 0) completarSesion();
     }
 }
 
@@ -173,19 +241,14 @@ function actualizarDisplay() {
 }
 
 function setProgress(timeRemain) {
+    if (tiempoTotal <= 0) return;
     const offset = circumference - (timeRemain / tiempoTotal) * circumference;
     if (circle) circle.style.strokeDashoffset = offset;
 }
 
 window.pausarReanudar = () => {
     enPausa = !enPausa;
-    const btn = document.getElementById('btn-pausa');
-    if (enPausa) {
-        btn.innerHTML = '<i data-app-icon="play"></i>';
-    } else {
-        btn.innerHTML = '<i data-app-icon="pause"></i>';
-    }
-    Icons.init();
+    actualizarIconoPausa();
 };
 
 window.detenerSesion = async () => {
@@ -203,19 +266,25 @@ window.detenerSesion = async () => {
 };
 
 async function completarSesion() {
+    clearInterval(timerInterval);
+    enPausa = true;
     // Registrar tiempo real (el total de la sesión)
     // Convertir segundos a minutos
     const minutos = Math.round(tiempoTotal / 60);
     Store.registrarTiempoFocus(minutos);
 
-    // Sonido final? (Opcional)
-    finalizar();
-
-    // Modal de celebración
-    await UI.alert({
-        titulo: '¡Sesión Completada!',
-        mensaje: `Has sumado <b>${minutos} minutos</b> de foco productivo.`
+    const repetir = await UI.confirm({
+        titulo: '¡Sesión completada!',
+        mensaje: `Sumaste <b>${minutos} minutos</b> de foco. ¿Quieres repetir la sesión?`,
+        textoConfirmar: 'Repetir',
+        textoCancelar: 'Terminar'
     });
+
+    if (repetir) {
+        reiniciarSesion();
+    } else {
+        finalizar();
+    }
 }
 
 // Helper para registrar tiempo parcial al detener
@@ -237,6 +306,30 @@ function finalizar() {
 
     tiempoRestante = tiempoTotal; // Reiniciar lógica del temporizador
     setProgress(tiempoTotal); // Círculo completo
+    actualizarDisplay();
+}
+
+function iniciarTemporizador() {
+    enPausa = false;
+    actualizarDisplay();
+    setProgress(tiempoRestante);
+    clearInterval(timerInterval);
+    timerInterval = setInterval(tick, 1000);
+    actualizarIconoPausa();
+}
+
+function reiniciarSesion() {
+    tiempoRestante = tiempoTotal;
+    iniciarTemporizador();
+}
+
+function actualizarIconoPausa() {
+    const btn = document.getElementById('btn-pausa');
+    if (!btn) return;
+    btn.innerHTML = enPausa
+        ? '<i data-app-icon="play"></i>'
+        : '<i data-app-icon="pause"></i>';
+    Icons.init();
 }
 
 // === MEZCLADOR DE AUDIO ===

@@ -91,11 +91,16 @@ const Auth = {
                     await DBManager.save('users', userForLocal, true);
                     Store.guardarUsuario(userForLocal);
 
-                    const syncResult = await DBManager.syncWithBackend();
-                    if (!syncResult || syncResult.ok) {
-                        await DBManager.loadAllFromBackend();
-                    } else {
-                        UI.toast("Hay cambios pendientes sin sincronizar. Usando datos locales.", "warning");
+                    try {
+                        const syncResult = await DBManager.syncWithBackend();
+                        if (!syncResult || syncResult.ok) {
+                            await DBManager.loadAllFromBackend();
+                        } else {
+                            UI.toast("Hay cambios pendientes sin sincronizar. Usando datos locales.", "warning");
+                        }
+                    } catch (error) {
+                        console.error("Error sincronizando en login:", error);
+                        UI.toast("No se pudo sincronizar todo, entrando con datos locales.", "warning");
                     }
 
                     window.location.href = 'semana.html';
@@ -140,11 +145,16 @@ const Auth = {
                                 });
 
                                 if (loginResponse.ok) {
-                                    const syncResult = await DBManager.syncWithBackend();
-                                    if (!syncResult || syncResult.ok) {
-                                        await DBManager.loadAllFromBackend();
-                                    } else {
-                                        UI.toast("Hay cambios pendientes sin sincronizar. Usando datos locales.", "warning");
+                                    try {
+                                        const syncResult = await DBManager.syncWithBackend();
+                                        if (!syncResult || syncResult.ok) {
+                                            await DBManager.loadAllFromBackend();
+                                        } else {
+                                            UI.toast("Hay cambios pendientes sin sincronizar. Usando datos locales.", "warning");
+                                        }
+                                    } catch (error) {
+                                        console.error("Error sincronizando en login:", error);
+                                        UI.toast("No se pudo sincronizar todo, entrando con datos locales.", "warning");
                                     }
                                 }
                             }

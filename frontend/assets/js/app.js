@@ -27,6 +27,12 @@ function iniciarAplicacion() {
 
     // 5. Configurar Selector de Espacios en Header
     configurarEspaciosHeader();
+
+    // 6. Validar página según el espacio actual
+    manejarRedireccionPorEspacio();
+
+    // 7. Intentar sincronizar pendientes si hay sesión
+    sincronizarPendientesInicial();
 }
 
 function verificarSesion() {
@@ -102,6 +108,14 @@ function cargarDatosUsuario() {
     });
 }
 
+function sincronizarPendientesInicial() {
+    const usuario = Store.obtenerUsuario();
+    if (!usuario || typeof DBManager === 'undefined') return;
+    if (!navigator.onLine) return;
+
+    DBManager.syncWithBackend();
+}
+
 function configurarSidebar() {
     const opcionesEspacio = document.querySelectorAll('.menu-lateral a');
     if (opcionesEspacio.length === 0) return;
@@ -131,10 +145,13 @@ function configurarSidebar() {
     // Escuchar cambios para actualizar UI
     document.addEventListener('cambio-espacio', (e) => {
         actualizarSidebarActivo();
+        actualizarSidebarPorEspacio();
+        manejarRedireccionPorEspacio();
     });
 
     // Inicializar estado visual
     actualizarSidebarActivo();
+    actualizarSidebarPorEspacio();
 }
 
 function actualizarSidebarActivo() {
@@ -151,6 +168,42 @@ function actualizarSidebarActivo() {
             }
         }
     });
+}
+
+function actualizarSidebarPorEspacio() {
+    const actual = Store.obtenerEspacioActual();
+    const opciones = document.querySelectorAll('[data-espacios]');
+
+    opciones.forEach(opcion => {
+        const espacios = opcion.getAttribute('data-espacios')
+            .split(',')
+            .map(e => e.trim())
+            .filter(Boolean);
+        const visible = espacios.includes(actual);
+        opcion.style.display = visible ? '' : 'none';
+    });
+}
+
+function manejarRedireccionPorEspacio() {
+    const actual = Store.obtenerEspacioActual();
+    const pagina = window.location.pathname.split('/').pop();
+
+    if (pagina === 'finanzas.html' && actual !== 'Personal') {
+        if (actual === 'Escuela') {
+            window.location.href = 'horario.html';
+        } else {
+            window.location.href = 'semana.html';
+        }
+        return;
+    }
+
+    if (pagina === 'horario.html' && actual !== 'Escuela') {
+        if (actual === 'Personal') {
+            window.location.href = 'finanzas.html';
+        } else {
+            window.location.href = 'semana.html';
+        }
+    }
 }
 
 function configurarEspaciosHeader() {
@@ -184,9 +237,7 @@ function configurarEspaciosHeader() {
     // Sincronizar con estado inicial
     const actual = Store.obtenerEspacioActual();
     botonesEspacio.forEach(btn => {
-        if (btn.getAttribute('data-espacio') === actual) {
-            btn.classList.add('activo-espacio');
-        }
+        btn.classList.toggle('activo-espacio', btn.getAttribute('data-espacio') === actual);
     });
 
     // Escuchar cambios de espacio para sincronizar

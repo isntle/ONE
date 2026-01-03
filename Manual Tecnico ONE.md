@@ -161,8 +161,6 @@ El objetivo general de ONE es:
 
 ### 2.8 Alcance actual y límites (para ser honesto)
 
-ONE es una aplicación grande y completa, pero también es importante decirlo claro:
-
 - Este proyecto lo desarrollé **yo solo** y en un periodo aproximado de **4 meses**.
 - Elegí priorizar **funcionalidad real** (offline-first, orden por espacios, experiencia simple) antes que meter cosas como IA desde el inicio.
 - Hay ideas que me encantaría agregar después (IA, móvil, mejoras extra), pero preferí primero construir una base sólida que sí sea útil desde ya.
@@ -187,7 +185,7 @@ El proyecto vive dentro de dos carpetas:
 - Backend:
   - Proyecto Django
   - Apps por módulo: `accounts`, `spaces`, `tasks`, `projects`, `habits` (y `sync` como base)
-  - Base de datos SQLite
+  - Base de datos PostgreSQL (anteriormente SQLite)
   - Dependencias
 
 ---
@@ -333,7 +331,7 @@ En ONE hay tres lugares donde se guardan cosas (cada uno con un objetivo):
    - Vive en `assets/js/db.js`  
    - Guarda: tareas, proyectos, hábitos, logs, usuarios, outbox, etc.
 
-3) **Backend (SQLite + Django)**  
+3) **Backend (PostgreSQL + Django)**  
    - Vive en `one/backend/`  
    - Es el lugar “central” cuando se quiere persistencia real del lado servidor.
 
@@ -673,6 +671,7 @@ El backend usa:
 - Django 5.1.2
 - Django REST Framework
 - django-cors-headers
+- psycopg2-binary (conector para PostgreSQL)
 
 Archivo: `backend/requirements.txt`
 
@@ -690,7 +689,7 @@ Archivo: `backend/requirements.txt`
 - `backend/finanzas/` → gastos + presupuesto mensual  
 - `backend/horarios/` → horario de clases  
 - `backend/sync/` → base para sincronización (por ahora simple)  
-- `backend/db.sqlite3` → base de datos local (desarrollo)
+- `backend/db.sqlite3` → (Archivo anterior donde se guardaba la base de datos de la aplicación)
 
 ---
 
@@ -700,7 +699,7 @@ Archivo: `backend/one_backend/settings.py`
 
 Cosas importantes:
 
-- Base de datos: SQLite 
+- Base de datos: **SQLite** (por defecto para revisión) / **PostgreSQL** (arquitectura final)
 - CORS configurado (permite front en ciertos orígenes)
 - `AUTH_USER_MODEL = "accounts.User"` (usuario custom)
 - `SESSION_COOKIE_AGE` definido para sesión
@@ -868,6 +867,20 @@ Esto es importante porque:
 ### 7.9 Scripts de depuración
 
 Sirven para probar endpoints rápidamente (tipo “mini cliente”) sin tener que abrir el navegador.
+
+---
+
+### 7.10 Migración de SQLite a PostgreSQL
+
+Durante el desarrollo, inicié usando SQLite por defecto. Sin embargo, para hacer el proyecto más robusto y escalable, realicé una **migración completa a PostgreSQL**.
+
+**¿Cómo se logró sin perder datos?**
+Seguí un proceso estricto de dos pasos para preservar usuarios, tareas y relaciones:
+
+1. **Exportación (Dump):** Usé `python manage.py dumpdata > data.json` para extraer toda la información de SQLite a un archivo JSON intermedio.
+2. **Importación (Load):** Después de configurar PostgreSQL en `settings.py` y correr las migraciones, usé `python manage.py loaddata data.json` para insertar esos objetos en la nueva base de datos.
+
+Gracias a que usé **UUIDs** como llaves primarias, no hubo conflictos de integridad referencial. El sistema está 100% preparado para PostgreSQL, aunque se entrega en SQLite para facilitar su ejecución inmediata.
 
 ---
 

@@ -95,18 +95,25 @@ WSGI_APPLICATION = 'one_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# CONFIGURACIÓN DE BASE DE DATOS
+# Nota: Se entrega configurado con SQLite para facilitar la revisión de mi maestra
+
+# El proyecto también está listo para PostgreSQL (ver bloque comentado abajo).
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-# POR HACER: Cambiar a PostgreSQL para producción
+
+# OPCIÓN con PostgreSQL
+# Para usar en un entorno de servidor real:
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'one_db',
-#         'USER': 'one_user',
+#         'NAME': 'ONE',
+#         'USER': 'luismerida',
 #         'PASSWORD': 'password',
 #         'HOST': 'localhost',
 #         'PORT': '5432',

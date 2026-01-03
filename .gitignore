@@ -13,3 +13,5 @@ backend/venv/
 # VS Code
 *.code-workspace
 
+# Data backups
+data.json

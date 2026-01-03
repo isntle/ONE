@@ -41,7 +41,7 @@ ONE está dividida en secciones claras, cada una con un propósito concreto:
 **Backend**
 - Python + Django
 - Django REST Framework
-- SQLite (desarrollo)
+- PostgreSQL
 - API REST para sincronización
 
 ---
